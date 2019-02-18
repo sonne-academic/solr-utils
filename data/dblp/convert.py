@@ -48,7 +48,8 @@ def build_docs(it):
         # add_field(doc, 'key', root.attrib['key'])
         add_field(doc, 'pub_type', root.tag)
         build_fields(doc, it)
-        yield ET.tostring(doc)
+        yield ET.tostring(doc, encoding='utf-8')
+        yield b'\n'
 
 
 def build_upload_document():
@@ -56,16 +57,19 @@ def build_upload_document():
     root_event, root_element = next(it)
     assert root_event == 'start'
     assert root_element.tag == 'dblp'
-    yield b'<add>'
+    yield b'<add>\n'
     yield from build_docs(it)
     yield b'</add>'
 
 
 def write_to_gzip():
-    with gzip.open(DATA_FOLDER / 'dblp_docs.xml.gz', 'wb') as out_file:
+    with gzip.open(DATA_FOLDER / 'dblp_docs.xml.gz', 'w') as out_file:
         for content in build_upload_document():
             out_file.write(content)
 
+def yield_from_gzip():
+    with gzip.open(DATA_FOLDER / 'dblp_docs.xml.gz', 'r') as in_file:
+        yield from in_file
 
 def write_to_bz2():
     with bz2.open(DATA_FOLDER / 'dblp_docs.xml.bz2', 'wb') as out_file:
@@ -82,4 +86,4 @@ def write_to_zstd():
 
 
 if __name__ == '__main__':
-    write_to_zstd()
+    write_to_gzip()
