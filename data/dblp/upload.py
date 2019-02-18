@@ -1,36 +1,29 @@
-import requests
-import queue
-import threading
-from data.dblp.convert import build_upload_document
-
-
-class WriteableQueue(queue.Queue):
-    def write(self, data):
-        # An empty string would be interpreted as EOF by the receiving server
-        if data:
-            self.put(data)
-
-    def __iter__(self):
-        return iter(self.get, None)
-
-    def close(self):
-        self.put(None)
-
-
-def post_request(iterable):
-    headers = {'Content-Type': 'text/xml'}
-    r = requests.post('http://localhost:8983/solr/dblp/update', data=iterable, headers=headers)
-    print(r.text)
+from data.dblp.convert import yield_from_gzip
+from solr.instances import get_localhost_session
 
 
 if __name__ == '__main__':
-    # q = WriteableQueue(1024)
-    # threading.Thread(target=post_request, args=(q,)).start()
-    post_request(build_upload_document())
-    # for content in build_document():
-    #     q.write(content)
-    #
-    # # closing ends the request
-    # q.close()
+    collection = 'dblp'
+    config = 'dblp'
+    s = get_localhost_session()
+    RESET = False
+    if RESET:
+        print('deleting collection')
+        print(s.admin.collections.delete(collection).json())
 
+        print('deleting config')
+        print(s.admin.configs.delete(config).json())
 
+        print('sending latest config')
+        print(s.admin.configs.upload(config,f'/home/bone/solr/solr/configsets/configs/{config}').json())
+
+        print('creating collection')
+        print(s.admin.collections.create(collection,3,1,1,config).json())
+
+    print('sending documents')
+    r = s.collection(collection).update.xml(yield_from_gzip())
+    print(r.text)
+
+    print('sending commit')
+    r = s.collection(collection).update.xml('<commit/>')
+    print(r.text)
