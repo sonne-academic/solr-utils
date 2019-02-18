@@ -1,0 +1,30 @@
+#set($docId = $doc.getFirstValue($request.schema.uniqueKeyField.name))
+
+#macro(url_for_search_filter $field $value)#url_for_home?q=#if($value!=$null)$esc.url($field):%22$esc.url($value)%22#else-$esc.url($field):[*+TO+*]#end#end
+
+<div class="result-document">
+
+  <table>
+    #foreach( $fieldName in $doc.fieldNames )
+        <tr>
+          <th align="right" valign="top" style="field-name">
+            $esc.html($fieldName):
+          </th>
+
+          <td align="left" valign="top">
+            #foreach($fieldValue in $doc.getFieldValues($fieldName))
+              <a class="fieldinfo" onmouseover="gj('$fieldName', '$fieldValue')" href="#url_for_search_filter($fieldName,$fieldValue)">$fieldValue</a> 
+            #end
+          </td>
+        </tr>
+    #end
+  </table>
+
+  #if($debug)
+    <a href="#" onclick='jQuery(this).siblings("pre").toggle(); return false;'>toggle explain</a>
+
+    <pre style="display:none">
+      $response.getExplainMap().get($docId)
+    </pre>
+  #end
+</div>

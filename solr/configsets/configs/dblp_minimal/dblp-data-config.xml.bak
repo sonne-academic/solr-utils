@@ -1,0 +1,331 @@
+<dataConfig>
+  <dataSource type="FileDataSource" name="fds" />
+  <document>
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/article">
+      <field column="key" xpath="/dblp/article/@key"/>
+      <field column="publtype" xpath="/dblp/article/@publtype"/>
+      <field column="mdate" xpath="/dblp/article/@mdate"/>
+      <field column="reviewid" xpath="/dblp/article/@reviewid"/>
+      <field column="rating" xpath="/dblp/article/@rating"/>
+      <field column="cdate" xpath="/dblp/article/@cdate"/>
+      <field column="author" xpath="/dblp/article/author"/>
+      <field column="editor" xpath="/dblp/article/editor"/>
+      <field column="title" xpath="/dblp/article/title"/>
+      <field column="booktitle" xpath="/dblp/article/booktitle"/>
+      <field column="pages" xpath="/dblp/article/pages"/>
+      <field column="year" xpath="/dblp/article/year"/>
+      <field column="address" xpath="/dblp/article/address"/>
+      <field column="journal" xpath="/dblp/article/journal"/>
+      <field column="volume" xpath="/dblp/article/volume"/>
+      <field column="number" xpath="/dblp/article/number"/>
+      <field column="month" xpath="/dblp/article/month"/>
+      <field column="url" xpath="/dblp/article/url"/>
+      <field column="ee" xpath="/dblp/article/ee"/>
+      <field column="cdrom" xpath="/dblp/article/cdrom"/>
+      <field column="cite" xpath="/dblp/article/cite"/>
+      <field column="publisher" xpath="/dblp/article/publisher"/>
+      <field column="note" xpath="/dblp/article/note"/>
+      <field column="crossref" xpath="/dblp/article/crossref"/>
+      <field column="isbn" xpath="/dblp/article/isbn"/>
+      <field column="series" xpath="/dblp/article/series"/>
+      <field column="school" xpath="/dblp/article/school"/>
+      <field column="chapter" xpath="/dblp/article/chapter"/>
+      <field column="publnr" xpath="/dblp/article/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/inproceedings">
+      <field column="key" xpath="/dblp/inproceedings/@key"/>
+      <field column="publtype" xpath="/dblp/inproceedings/@publtype"/>
+      <field column="mdate" xpath="/dblp/inproceedings/@mdate"/>
+      <field column="cdate" xpath="/dblp/inproceedings/@cdate"/>
+      <field column="author" xpath="/dblp/inproceedings/author"/>
+      <field column="editor" xpath="/dblp/inproceedings/editor"/>
+      <field column="title" xpath="/dblp/inproceedings/title"/>
+      <field column="booktitle" xpath="/dblp/inproceedings/booktitle"/>
+      <field column="pages" xpath="/dblp/inproceedings/pages"/>
+      <field column="year" xpath="/dblp/inproceedings/year"/>
+      <field column="address" xpath="/dblp/inproceedings/address"/>
+      <field column="journal" xpath="/dblp/inproceedings/journal"/>
+      <field column="volume" xpath="/dblp/inproceedings/volume"/>
+      <field column="number" xpath="/dblp/inproceedings/number"/>
+      <field column="month" xpath="/dblp/inproceedings/month"/>
+      <field column="url" xpath="/dblp/inproceedings/url"/>
+      <field column="ee" xpath="/dblp/inproceedings/ee"/>
+      <field column="cdrom" xpath="/dblp/inproceedings/cdrom"/>
+      <field column="cite" xpath="/dblp/inproceedings/cite"/>
+      <field column="publisher" xpath="/dblp/inproceedings/publisher"/>
+      <field column="note" xpath="/dblp/inproceedings/note"/>
+      <field column="crossref" xpath="/dblp/inproceedings/crossref"/>
+      <field column="isbn" xpath="/dblp/inproceedings/isbn"/>
+      <field column="series" xpath="/dblp/inproceedings/series"/>
+      <field column="school" xpath="/dblp/inproceedings/school"/>
+      <field column="chapter" xpath="/dblp/inproceedings/chapter"/>
+      <field column="publnr" xpath="/dblp/inproceedings/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/proceedings">
+      <field column="key" xpath="/dblp/proceedings/@key"/>
+      <field column="publtype" xpath="/dblp/proceedings/@publtype"/>
+      <field column="mdate" xpath="/dblp/proceedings/@mdate"/>
+      <field column="cdate" xpath="/dblp/proceedings/@cdate"/>
+      <field column="author" xpath="/dblp/proceedings/author"/>
+      <field column="editor" xpath="/dblp/proceedings/editor"/>
+      <field column="title" xpath="/dblp/proceedings/title"/>
+      <field column="booktitle" xpath="/dblp/proceedings/booktitle"/>
+      <field column="pages" xpath="/dblp/proceedings/pages"/>
+      <field column="year" xpath="/dblp/proceedings/year"/>
+      <field column="address" xpath="/dblp/proceedings/address"/>
+      <field column="journal" xpath="/dblp/proceedings/journal"/>
+      <field column="volume" xpath="/dblp/proceedings/volume"/>
+      <field column="number" xpath="/dblp/proceedings/number"/>
+      <field column="month" xpath="/dblp/proceedings/month"/>
+      <field column="url" xpath="/dblp/proceedings/url"/>
+      <field column="ee" xpath="/dblp/proceedings/ee"/>
+      <field column="cdrom" xpath="/dblp/proceedings/cdrom"/>
+      <field column="cite" xpath="/dblp/proceedings/cite"/>
+      <field column="publisher" xpath="/dblp/proceedings/publisher"/>
+      <field column="note" xpath="/dblp/proceedings/note"/>
+      <field column="crossref" xpath="/dblp/proceedings/crossref"/>
+      <field column="isbn" xpath="/dblp/proceedings/isbn"/>
+      <field column="series" xpath="/dblp/proceedings/series"/>
+      <field column="school" xpath="/dblp/proceedings/school"/>
+      <field column="chapter" xpath="/dblp/proceedings/chapter"/>
+      <field column="publnr" xpath="/dblp/proceedings/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/book">
+      <field column="key" xpath="/dblp/book/@key"/>
+      <field column="publtype" xpath="/dblp/book/@publtype"/>
+      <field column="mdate" xpath="/dblp/book/@mdate"/>
+      <field column="cdate" xpath="/dblp/book/@cdate"/>
+      <field column="author" xpath="/dblp/book/author"/>
+      <field column="editor" xpath="/dblp/book/editor"/>
+      <field column="title" xpath="/dblp/book/title"/>
+      <field column="booktitle" xpath="/dblp/book/booktitle"/>
+      <field column="pages" xpath="/dblp/book/pages"/>
+      <field column="year" xpath="/dblp/book/year"/>
+      <field column="address" xpath="/dblp/book/address"/>
+      <field column="journal" xpath="/dblp/book/journal"/>
+      <field column="volume" xpath="/dblp/book/volume"/>
+      <field column="number" xpath="/dblp/book/number"/>
+      <field column="month" xpath="/dblp/book/month"/>
+      <field column="url" xpath="/dblp/book/url"/>
+      <field column="ee" xpath="/dblp/book/ee"/>
+      <field column="cdrom" xpath="/dblp/book/cdrom"/>
+      <field column="cite" xpath="/dblp/book/cite"/>
+      <field column="publisher" xpath="/dblp/book/publisher"/>
+      <field column="note" xpath="/dblp/book/note"/>
+      <field column="crossref" xpath="/dblp/book/crossref"/>
+      <field column="isbn" xpath="/dblp/book/isbn"/>
+      <field column="series" xpath="/dblp/book/series"/>
+      <field column="school" xpath="/dblp/book/school"/>
+      <field column="chapter" xpath="/dblp/book/chapter"/>
+      <field column="publnr" xpath="/dblp/book/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/incollection">
+      <field column="key" xpath="/dblp/incollection/@key"/>
+      <field column="publtype" xpath="/dblp/incollection/@publtype"/>
+      <field column="mdate" xpath="/dblp/incollection/@mdate"/>
+      <field column="cdate" xpath="/dblp/incollection/@cdate"/>
+      <field column="author" xpath="/dblp/incollection/author"/>
+      <field column="editor" xpath="/dblp/incollection/editor"/>
+      <field column="title" xpath="/dblp/incollection/title"/>
+      <field column="booktitle" xpath="/dblp/incollection/booktitle"/>
+      <field column="pages" xpath="/dblp/incollection/pages"/>
+      <field column="year" xpath="/dblp/incollection/year"/>
+      <field column="address" xpath="/dblp/incollection/address"/>
+      <field column="journal" xpath="/dblp/incollection/journal"/>
+      <field column="volume" xpath="/dblp/incollection/volume"/>
+      <field column="number" xpath="/dblp/incollection/number"/>
+      <field column="month" xpath="/dblp/incollection/month"/>
+      <field column="url" xpath="/dblp/incollection/url"/>
+      <field column="ee" xpath="/dblp/incollection/ee"/>
+      <field column="cdrom" xpath="/dblp/incollection/cdrom"/>
+      <field column="cite" xpath="/dblp/incollection/cite"/>
+      <field column="publisher" xpath="/dblp/incollection/publisher"/>
+      <field column="note" xpath="/dblp/incollection/note"/>
+      <field column="crossref" xpath="/dblp/incollection/crossref"/>
+      <field column="isbn" xpath="/dblp/incollection/isbn"/>
+      <field column="series" xpath="/dblp/incollection/series"/>
+      <field column="school" xpath="/dblp/incollection/school"/>
+      <field column="chapter" xpath="/dblp/incollection/chapter"/>
+      <field column="publnr" xpath="/dblp/incollection/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/phdthesis">
+      <field column="key" xpath="/dblp/phdthesis/@key"/>
+      <field column="publtype" xpath="/dblp/phdthesis/@publtype"/>
+      <field column="mdate" xpath="/dblp/phdthesis/@mdate"/>
+      <field column="cdate" xpath="/dblp/phdthesis/@cdate"/>
+      <field column="author" xpath="/dblp/phdthesis/author"/>
+      <field column="editor" xpath="/dblp/phdthesis/editor"/>
+      <field column="title" xpath="/dblp/phdthesis/title"/>
+      <field column="booktitle" xpath="/dblp/phdthesis/booktitle"/>
+      <field column="pages" xpath="/dblp/phdthesis/pages"/>
+      <field column="year" xpath="/dblp/phdthesis/year"/>
+      <field column="address" xpath="/dblp/phdthesis/address"/>
+      <field column="journal" xpath="/dblp/phdthesis/journal"/>
+      <field column="volume" xpath="/dblp/phdthesis/volume"/>
+      <field column="number" xpath="/dblp/phdthesis/number"/>
+      <field column="month" xpath="/dblp/phdthesis/month"/>
+      <field column="url" xpath="/dblp/phdthesis/url"/>
+      <field column="ee" xpath="/dblp/phdthesis/ee"/>
+      <field column="cdrom" xpath="/dblp/phdthesis/cdrom"/>
+      <field column="cite" xpath="/dblp/phdthesis/cite"/>
+      <field column="publisher" xpath="/dblp/phdthesis/publisher"/>
+      <field column="note" xpath="/dblp/phdthesis/note"/>
+      <field column="crossref" xpath="/dblp/phdthesis/crossref"/>
+      <field column="isbn" xpath="/dblp/phdthesis/isbn"/>
+      <field column="series" xpath="/dblp/phdthesis/series"/>
+      <field column="school" xpath="/dblp/phdthesis/school"/>
+      <field column="chapter" xpath="/dblp/phdthesis/chapter"/>
+      <field column="publnr" xpath="/dblp/phdthesis/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/mastersthesis">
+      <field column="key" xpath="/dblp/mastersthesis/@key"/>
+      <field column="publtype" xpath="/dblp/mastersthesis/@publtype"/>
+      <field column="mdate" xpath="/dblp/mastersthesis/@mdate"/>
+      <field column="cdate" xpath="/dblp/mastersthesis/@cdate"/>
+      <field column="author" xpath="/dblp/mastersthesis/author"/>
+      <field column="editor" xpath="/dblp/mastersthesis/editor"/>
+      <field column="title" xpath="/dblp/mastersthesis/title"/>
+      <field column="booktitle" xpath="/dblp/mastersthesis/booktitle"/>
+      <field column="pages" xpath="/dblp/mastersthesis/pages"/>
+      <field column="year" xpath="/dblp/mastersthesis/year"/>
+      <field column="address" xpath="/dblp/mastersthesis/address"/>
+      <field column="journal" xpath="/dblp/mastersthesis/journal"/>
+      <field column="volume" xpath="/dblp/mastersthesis/volume"/>
+      <field column="number" xpath="/dblp/mastersthesis/number"/>
+      <field column="month" xpath="/dblp/mastersthesis/month"/>
+      <field column="url" xpath="/dblp/mastersthesis/url"/>
+      <field column="ee" xpath="/dblp/mastersthesis/ee"/>
+      <field column="cdrom" xpath="/dblp/mastersthesis/cdrom"/>
+      <field column="cite" xpath="/dblp/mastersthesis/cite"/>
+      <field column="publisher" xpath="/dblp/mastersthesis/publisher"/>
+      <field column="note" xpath="/dblp/mastersthesis/note"/>
+      <field column="crossref" xpath="/dblp/mastersthesis/crossref"/>
+      <field column="isbn" xpath="/dblp/mastersthesis/isbn"/>
+      <field column="series" xpath="/dblp/mastersthesis/series"/>
+      <field column="school" xpath="/dblp/mastersthesis/school"/>
+      <field column="chapter" xpath="/dblp/mastersthesis/chapter"/>
+      <field column="publnr" xpath="/dblp/mastersthesis/publnr"/>
+    </entity>
+    
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/www">
+      <field column="key" xpath="/dblp/www/@key"/>
+      <field column="publtype" xpath="/dblp/www/@publtype"/>
+      <field column="mdate" xpath="/dblp/www/@mdate"/>
+      <field column="cdate" xpath="/dblp/www/@cdate"/>
+      <field column="author" xpath="/dblp/www/author"/>
+      <field column="editor" xpath="/dblp/www/editor"/>
+      <field column="title" xpath="/dblp/www/title"/>
+      <field column="booktitle" xpath="/dblp/www/booktitle"/>
+      <field column="pages" xpath="/dblp/www/pages"/>
+      <field column="year" xpath="/dblp/www/year"/>
+      <field column="address" xpath="/dblp/www/address"/>
+      <field column="journal" xpath="/dblp/www/journal"/>
+      <field column="volume" xpath="/dblp/www/volume"/>
+      <field column="number" xpath="/dblp/www/number"/>
+      <field column="month" xpath="/dblp/www/month"/>
+      <field column="url" xpath="/dblp/www/url"/>
+      <field column="ee" xpath="/dblp/www/ee"/>
+      <field column="cdrom" xpath="/dblp/www/cdrom"/>
+      <field column="cite" xpath="/dblp/www/cite"/>
+      <field column="publisher" xpath="/dblp/www/publisher"/>
+      <field column="note" xpath="/dblp/www/note"/>
+      <field column="crossref" xpath="/dblp/www/crossref"/>
+      <field column="isbn" xpath="/dblp/www/isbn"/>
+      <field column="series" xpath="/dblp/www/series"/>
+      <field column="school" xpath="/dblp/www/school"/>
+      <field column="chapter" xpath="/dblp/www/chapter"/>
+      <field column="publnr" xpath="/dblp/www/publnr"/>
+    </entity>
+        
+    <entity name="dblp"
+	    processor="XPathEntityProcessor"
+	    dataSource="fds"
+	    url="${solr.install.dir}/dblp.xml"
+	    onError="abort"
+	    stream="true"
+	    forEach="/dblp/data">
+      <field column="key" xpath="/dblp/data/@key"/>
+      <field column="publtype" xpath="/dblp/data/@publtype"/>
+      <field column="mdate" xpath="/dblp/data/@mdate"/>
+      <field column="cdate" xpath="/dblp/data/@cdate"/>
+      <field column="author" xpath="/dblp/data/author"/>
+      <field column="editor" xpath="/dblp/data/editor"/>
+      <field column="title" xpath="/dblp/data/title"/>
+      <field column="booktitle" xpath="/dblp/data/booktitle"/>
+      <field column="pages" xpath="/dblp/data/pages"/>
+      <field column="year" xpath="/dblp/data/year"/>
+      <field column="address" xpath="/dblp/data/address"/>
+      <field column="journal" xpath="/dblp/data/journal"/>
+      <field column="volume" xpath="/dblp/data/volume"/>
+      <field column="number" xpath="/dblp/data/number"/>
+      <field column="month" xpath="/dblp/data/month"/>
+      <field column="url" xpath="/dblp/data/url"/>
+      <field column="ee" xpath="/dblp/data/ee"/>
+      <field column="cdrom" xpath="/dblp/data/cdrom"/>
+      <field column="cite" xpath="/dblp/data/cite"/>
+      <field column="publisher" xpath="/dblp/data/publisher"/>
+      <field column="note" xpath="/dblp/data/note"/>
+      <field column="crossref" xpath="/dblp/data/crossref"/>
+      <field column="isbn" xpath="/dblp/data/isbn"/>
+      <field column="series" xpath="/dblp/data/series"/>
+      <field column="school" xpath="/dblp/data/school"/>
+      <field column="chapter" xpath="/dblp/data/chapter"/>
+      <field column="publnr" xpath="/dblp/data/publnr"/>
+    </entity>
+    
+  </document>
+</dataConfig>

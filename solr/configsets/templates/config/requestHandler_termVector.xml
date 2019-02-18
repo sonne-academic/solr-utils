@@ -1,0 +1,25 @@
+<config>
+
+  <!-- Term Vector Component
+
+       http://wiki.apache.org/solr/TermVectorComponent
+    -->
+  <searchComponent name="tvComponent" class="solr.TermVectorComponent"/>
+
+  <!-- A request handler for demonstrating the term vector component
+
+       This is purely as an example.
+
+       In reality you will likely want to add the component to your
+       already specified request handlers.
+    -->
+  <requestHandler name="/tvrh" class="solr.SearchHandler" startup="lazy">
+    <lst name="defaults">
+      <bool name="tv">true</bool>
+    </lst>
+    <arr name="last-components">
+      <str>tvComponent</str>
+    </arr>
+  </requestHandler>
+
+</config>

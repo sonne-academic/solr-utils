@@ -1,0 +1,91 @@
+<config>
+      <!-- Controls what version of Lucene various components of Solr
+       adhere to.  Generally, you want to use the latest version to
+       get all bug fixes and improvements. It is highly recommended
+       that you fully re-index after changing this setting as it can
+       affect both how text is indexed and queried.
+  -->
+  <luceneMatchVersion>7.4.0</luceneMatchVersion>
+      <!-- A 'dir' option by itself adds any files found in the directory
+       to the classpath, this is useful for including all jars in a
+       directory.
+
+       When a 'regex' is specified in addition to a 'dir', only the
+       files in that directory which completely match the regex
+       (anchored on both ends) will be included.
+
+       If a 'dir' option (with or without a regex) is used and nothing
+       is found that matches, a warning will be logged.
+
+       The examples below can be used to load some solr-contribs along
+       with their external dependencies.
+    -->
+  <lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-cell-\d.*\.jar" />
+
+  <lib dir="${solr.install.dir:../../../..}/contrib/clustering/lib/" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-clustering-\d.*\.jar" />
+
+  <lib dir="${solr.install.dir:../../../..}/contrib/langid/lib/" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-langid-\d.*\.jar" />
+
+  <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
+  <!-- Data Directory
+
+       Used to specify an alternate directory to hold all index data
+       other than the default ./data under the Solr home.  If
+       replication is in use, this should match the replication
+       configuration.
+    -->
+  <dataDir>${solr.data.dir:}</dataDir>
+
+
+  <!-- The DirectoryFactory to use for indexes.
+
+       solr.StandardDirectoryFactory is filesystem
+       based and tries to pick the best implementation for the current
+       JVM and platform.  solr.NRTCachingDirectoryFactory, the default,
+       wraps solr.StandardDirectoryFactory and caches small files in memory
+       for better NRT performance.
+
+       One can force a particular implementation via solr.MMapDirectoryFactory,
+       solr.NIOFSDirectoryFactory, or solr.SimpleFSDirectoryFactory.
+
+       solr.RAMDirectoryFactory is memory based and not persistent.
+    -->
+  <directoryFactory name="DirectoryFactory"
+                    class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
+
+  <!-- The CodecFactory for defining the format of the inverted index.
+       The default implementation is SchemaCodecFactory, which is the official Lucene
+       index format, but hooks into the schema to provide per-field customization of
+       the postings lists and per-document values in the fieldType element
+       (postingsFormat/docValuesFormat). Note that most of the alternative implementations
+       are experimental, so if you choose to customize the index format, it's a good
+       idea to convert back to the official format e.g. via IndexWriter.addIndexes(IndexReader)
+       before upgrading to a newer version to avoid unnecessary reindexing.
+       A "compressionMode" string element can be added to <codecFactory> to choose
+       between the existing compression modes in the default codec: "BEST_SPEED" (default)
+       or "BEST_COMPRESSION".
+  -->
+  <codecFactory class="solr.SchemaCodecFactory"/>
+  <!-- JMX
+
+       This example enables JMX if and only if an existing MBeanServer
+       is found, use this if you want to configure JMX through JVM
+       parameters. Remove this to disable exposing Solr configuration
+       and statistics to JMX.
+
+       For more details see http://wiki.apache.org/solr/SolrJmx
+    -->
+  <jmx />
+  <!-- If you want to connect to a particular server, specify the
+       agentId
+    -->
+  <!-- <jmx agentId="myAgent" /> -->
+  <!-- If you want to start a new MBeanServer, specify the serviceUrl -->
+  <!-- <jmx serviceUrl="service:jmx:rmi:///jndi/rmi://localhost:9999/solr"/>
+    -->
+
+</config>

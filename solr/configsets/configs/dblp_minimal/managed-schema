@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solr managed schema - automatically generated - DO NOT EDIT -->
+<schema name="default-config" version="1.6">
+  <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true"/>
+  <fieldType name="strings" class="solr.StrField" sortMissingLast="true" docValues="true" multiValued="true"/>
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true"/>
+
+  <fieldType name="important_strings" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true"  multiValued="true"/>
+  <fieldType name="important_string"  class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true"/>
+  <fieldType name="pub_type" class="solr.EnumFieldType" docValues="true" enumsConfig="enumsConfig.xml" enumName="ptype"/>
+
+  <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
+  <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
+  <field name="_version_" type="plong" indexed="false" stored="false"/>
+
+  <uniqueKey>key</uniqueKey>
+  <field name="key" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+  
+  <field name="pub_type"         type="pub_type"/>
+  <field name="publtype"	 type="important_string"/>
+  <field name="mdate"		 type="important_string"/>
+  <field name="cdate"		 type="important_string"/>
+  
+  <field name="address"		 type="important_strings"/>
+  <field name="author"		 type="important_strings"/>
+  <field name="booktitle"	 type="important_strings"/>
+  <field name="cdrom"		 type="important_strings"/>
+  <field name="chapter"		 type="important_strings"/>
+  <field name="cite"		 type="important_strings"/>
+  <field name="crossref"	 type="important_strings"/>
+  <field name="editor"		 type="important_strings"/>
+  <field name="ee"		 type="important_strings"/>
+  <field name="isbn"		 type="important_strings"/>
+  <field name="journal"		 type="important_strings"/>
+  <field name="month"		 type="important_strings"/>
+  <field name="note"		 type="important_strings"/>
+  <field name="number"		 type="important_strings"/>
+  <field name="pages"		 type="important_strings"/>
+  <field name="publisher"	 type="important_strings"/>
+  <field name="publnr"		 type="important_strings"/>
+  <field name="school"		 type="important_strings"/>
+  <field name="series"		 type="important_strings"/>
+  <field name="title"		 type="important_strings"/>
+  <field name="url"		 type="important_strings"/>
+  <field name="volume"		 type="important_strings"/>
+  <field name="year"		 type="important_strings"/>
+</schema>

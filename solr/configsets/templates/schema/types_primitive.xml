@@ -1,0 +1,47 @@
+<schema name="default-config" version="1.6">
+        <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true" />
+    <fieldType name="strings" class="solr.StrField" sortMissingLast="true" multiValued="true" docValues="true" />
+
+    <!-- boolean type: "true" or "false" -->
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+    <fieldType name="booleans" class="solr.BoolField" sortMissingLast="true" multiValued="true"/>
+
+    <!--
+      Numeric field types that index values using KD-trees.
+      Point fields don't support FieldCache, so they must have docValues="true" if needed for sorting, faceting, functions, etc.
+    -->
+    <fieldType name="pint" class="solr.IntPointField" docValues="true"/>
+    <fieldType name="pfloat" class="solr.FloatPointField" docValues="true"/>
+    <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
+    <fieldType name="pdouble" class="solr.DoublePointField" docValues="true"/>
+
+    <fieldType name="pints" class="solr.IntPointField" docValues="true" multiValued="true"/>
+    <fieldType name="pfloats" class="solr.FloatPointField" docValues="true" multiValued="true"/>
+    <fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true"/>
+    <fieldType name="pdoubles" class="solr.DoublePointField" docValues="true" multiValued="true"/>
+    <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
+
+    <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
+    <fieldType name="binary" class="solr.BinaryField"/>
+
+    <!-- Similarity is the scoring routine for each document vs. a query.
+       A custom Similarity or SimilarityFactory may be specified here, but
+       the default is fine for most applications.
+       For more info: http://lucene.apache.org/solr/guide/other-schema-elements.html#OtherSchemaElements-Similarity
+    -->
+    <!--
+     <similarity class="com.example.solr.CustomSimilarityFactory">
+       <str name="paramkey">param value</str>
+     </similarity>
+    -->
+
+    <!-- Pre-analyzed field type, allows inserting arbitrary token streams and stored values. -->
+    <fieldType name="preanalyzed" class="solr.PreAnalyzedField">
+      <!-- PreAnalyzedField's builtin index analyzer just decodes the pre-analyzed token stream. -->
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+</schema>

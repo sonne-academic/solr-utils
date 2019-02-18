@@ -1,0 +1,33 @@
+<schema name="default-config" version="1.6">
+
+    <!-- This point type indexes the coordinates as separate fields (subFields)
+      If subFieldType is defined, it references a type, and a dynamic field
+      definition is created matching *___<typename>.  Alternately, if
+      subFieldSuffix is defined, that is used to create the subFields.
+      Example: if subFieldType="double", then the coordinates would be
+        indexed in fields myloc_0___double,myloc_1___double.
+      Example: if subFieldSuffix="_d" then the coordinates would be indexed
+        in fields myloc_0_d,myloc_1_d
+      The subFields are an implementation detail of the fieldType, and end
+      users normally should not need to know about them.
+     -->
+    <dynamicField name="*_point" type="point"  indexed="true"  stored="true"/>
+    <fieldType name="point" class="solr.PointType" dimension="2" subFieldSuffix="_d"/>
+
+    <!-- A specialized field for geospatial search filters and distance sorting. -->
+    <fieldType name="location" class="solr.LatLonPointSpatialField" docValues="true"/>
+
+    <!-- A geospatial field type that supports multiValued and polygon shapes.
+      For more information about this and other spatial fields see:
+      http://lucene.apache.org/solr/guide/spatial-search.html
+    -->
+    <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType"
+               geo="true" distErrPct="0.025" maxDistErr="0.001" distanceUnits="kilometers" />
+
+    <!-- Spatial rectangle (bounding box) field. It supports most spatial predicates, and has
+     special relevancy modes: score=overlapRatio|area|area2D (local-param to the query).  DocValues is recommended for
+     relevancy. -->
+    <fieldType name="bbox" class="solr.BBoxField"
+               geo="true" distanceUnits="kilometers" numberType="pdouble" />
+
+</schema>

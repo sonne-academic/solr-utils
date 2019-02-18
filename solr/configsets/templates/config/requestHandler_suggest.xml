@@ -1,0 +1,35 @@
+<config>
+
+  <!-- The SuggestComponent in Solr provides users with automatic suggestions for query terms.
+       You can use this to implement a powerful auto-suggest feature in your search application.
+       As with the rest of this solrconfig.xml file, the configuration of this component is purely
+       an example that applies specifically to this configset and example documents.
+
+       More information about this component and other configuration options are described in the
+       "Suggester" section of the reference guide available at
+       http://archive.apache.org/dist/lucene/solr/ref-guide
+    -->
+  <searchComponent name="suggest" class="solr.SuggestComponent">
+    <lst name="suggester">
+      <str name="name">mySuggester</str>
+      <str name="lookupImpl">FuzzyLookupFactory</str>
+      <str name="dictionaryImpl">DocumentDictionaryFactory</str>
+      <str name="field">cat</str>
+      <str name="weightField">price</str>
+      <str name="suggestAnalyzerFieldType">string</str>
+      <str name="buildOnStartup">false</str>
+    </lst>
+  </searchComponent>
+
+  <requestHandler name="/suggest" class="solr.SearchHandler"
+                  startup="lazy" >
+    <lst name="defaults">
+      <str name="suggest">true</str>
+      <str name="suggest.count">10</str>
+    </lst>
+    <arr name="components">
+      <str>suggest</str>
+    </arr>
+  </requestHandler>
+
+</config>

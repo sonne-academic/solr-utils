@@ -1,0 +1,44 @@
+<config>
+
+  <!-- Document Transformers
+       http://wiki.apache.org/solr/DocTransformers
+    -->
+  <!--
+     Could be something like:
+     <transformer name="db" class="com.mycompany.LoadFromDatabaseTransformer" >
+       <int name="connection">jdbc://....</int>
+     </transformer>
+
+     To add a constant value to all docs, use:
+     <transformer name="mytrans2" class="org.apache.solr.response.transform.ValueAugmenterFactory" >
+       <int name="value">5</int>
+     </transformer>
+
+     If you want the user to still be able to change it with _value:something_ use this:
+     <transformer name="mytrans3" class="org.apache.solr.response.transform.ValueAugmenterFactory" >
+       <double name="defaultValue">5</double>
+     </transformer>
+
+      If you are using the QueryElevationComponent, you may wish to mark documents that get boosted.  The
+      EditorialMarkerFactory will do exactly that:
+     <transformer name="qecBooster" class="org.apache.solr.response.transform.EditorialMarkerFactory" />
+    -->
+
+    <!--
+      LTR Transformer will encode the document features in the response. For each document the transformer
+      will add the features as an extra field in the response. The name of the field will be the
+      name of the transformer enclosed between brackets (in this case [features]).
+      In order to get the feature vector you will have to specify that you
+      want the field (e.g., fl="*,[features])
+
+      You will need to set the solr.ltr.enabled system property
+      when running solr to run with ltr enabled:
+        -Dsolr.ltr.enabled=true
+
+      https://lucene.apache.org/solr/guide/learning-to-rank.html
+      -->
+    <transformer enable="${solr.ltr.enabled:false}" name="features" class="org.apache.solr.ltr.response.transform.LTRFeatureLoggerTransformerFactory">
+      <str name="fvCacheName">QUERY_DOC_FV</str>
+    </transformer>
+
+</config>

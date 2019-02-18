@@ -1,0 +1,118 @@
+<config>
+     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       Index Config - These settings control low-level behavior of indexing
+       Most example settings here show the default value, but are commented
+       out, to more easily see where customizations have been made.
+
+       Note: This replaces <indexDefaults> and <mainIndex> from older versions
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <indexConfig>
+    <!-- maxFieldLength was removed in 4.0. To get similar behavior, include a
+         LimitTokenCountFilterFactory in your fieldType definition. E.g.
+     <filter class="solr.LimitTokenCountFilterFactory" maxTokenCount="10000"/>
+    -->
+    <!-- Maximum time to wait for a write lock (ms) for an IndexWriter. Default: 1000 -->
+    <!-- <writeLockTimeout>1000</writeLockTimeout>  -->
+
+    <!-- Expert: Enabling compound file will use less files for the index,
+         using fewer file descriptors on the expense of performance decrease.
+         Default in Lucene is "true". Default in Solr is "false" (since 3.6) -->
+    <!-- <useCompoundFile>false</useCompoundFile> -->
+
+    <!-- ramBufferSizeMB sets the amount of RAM that may be used by Lucene
+         indexing for buffering added documents and deletions before they are
+         flushed to the Directory.
+         maxBufferedDocs sets a limit on the number of documents buffered
+         before flushing.
+         If both ramBufferSizeMB and maxBufferedDocs is set, then
+         Lucene will flush based on whichever limit is hit first.  -->
+    <!-- <ramBufferSizeMB>100</ramBufferSizeMB> -->
+    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
+
+    <!-- Expert: Merge Policy
+         The Merge Policy in Lucene controls how merging of segments is done.
+         The default since Solr/Lucene 3.3 is TieredMergePolicy.
+         The default since Lucene 2.3 was the LogByteSizeMergePolicy,
+         Even older versions of Lucene used LogDocMergePolicy.
+      -->
+    <!--
+        <mergePolicyFactory class="org.apache.solr.index.TieredMergePolicyFactory">
+          <int name="maxMergeAtOnce">10</int>
+          <int name="segmentsPerTier">10</int>
+          <double name="noCFSRatio">0.1</double>
+        </mergePolicyFactory>
+      -->
+
+    <!-- Expert: Merge Scheduler
+         The Merge Scheduler in Lucene controls how merges are
+         performed.  The ConcurrentMergeScheduler (Lucene 2.3 default)
+         can perform merges in the background using separate threads.
+         The SerialMergeScheduler (Lucene 2.2 default) does not.
+     -->
+    <!--
+       <mergeScheduler class="org.apache.lucene.index.ConcurrentMergeScheduler"/>
+       -->
+
+    <!-- LockFactory
+
+         This option specifies which Lucene LockFactory implementation
+         to use.
+
+         single = SingleInstanceLockFactory - suggested for a
+                  read-only index or when there is no possibility of
+                  another process trying to modify the index.
+         native = NativeFSLockFactory - uses OS native file locking.
+                  Do not use when multiple solr webapps in the same
+                  JVM are attempting to share a single index.
+         simple = SimpleFSLockFactory  - uses a plain file for locking
+
+         Defaults: 'native' is default for Solr3.6 and later, otherwise
+                   'simple' is the default
+
+         More details on the nuances of each LockFactory...
+         http://wiki.apache.org/lucene-java/AvailableLockFactories
+    -->
+    <lockType>${solr.lock.type:native}</lockType>
+
+    <!-- Commit Deletion Policy
+         Custom deletion policies can be specified here. The class must
+         implement org.apache.lucene.index.IndexDeletionPolicy.
+
+         The default Solr IndexDeletionPolicy implementation supports
+         deleting index commit points on number of commits, age of
+         commit point and optimized status.
+
+         The latest commit point should always be preserved regardless
+         of the criteria.
+    -->
+    <!--
+    <deletionPolicy class="solr.SolrDeletionPolicy">
+    -->
+    <!-- The number of commit points to be kept -->
+    <!-- <str name="maxCommitsToKeep">1</str> -->
+    <!-- The number of optimized commit points to be kept -->
+    <!-- <str name="maxOptimizedCommitsToKeep">0</str> -->
+    <!--
+        Delete all commit points once they have reached the given age.
+        Supports DateMathParser syntax e.g.
+      -->
+    <!--
+       <str name="maxCommitAge">30MINUTES</str>
+       <str name="maxCommitAge">1DAY</str>
+    -->
+    <!--
+    </deletionPolicy>
+    -->
+
+    <!-- Lucene Infostream
+
+         To aid in advanced debugging, Lucene provides an "InfoStream"
+         of detailed information when indexing.
+
+         Setting The value to true will instruct the underlying Lucene
+         IndexWriter to write its debugging info the specified file
+      -->
+    <!-- <infoStream file="INFOSTREAM.txt">false</infoStream> -->
+  </indexConfig>
+
+</config>

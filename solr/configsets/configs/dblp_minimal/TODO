@@ -1,0 +1,9 @@
+add publication_type as enum (article phdthesis ...)
+use termVectors
+use other types than strings where applicable --> year?
+
+streamline xpaths in importer
+XpathReader can use 'XSL' transforms for data.
+
+volume, year
+mdate YYYY-MM-DD
