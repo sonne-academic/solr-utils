@@ -1,105 +1,116 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-    <luceneMatchVersion>7.4.0</luceneMatchVersion>
+  <luceneMatchVersion>7.7.0</luceneMatchVersion>
 
-    <updateHandler><updateLog><str name="dir">${solr.data.dir:}</str></updateLog></updateHandler>
+  <updateHandler>
+    <updateLog>
+      <str name="dir">${solr.data.dir:}</str>
+    </updateLog>
+  </updateHandler>
 
-    <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
-        <arr name="format">
-            <str>yyyy-MM-dd</str>
-            <str>yyyy</str>
-        </arr>
-    </updateProcessor>
-    <updateRequestProcessorChain name="defaultWithParseDate" default="true"
-                                 processor="parse-date">
-        <processor class="solr.LogUpdateProcessorFactory"/>
-        <processor class="solr.DistributedUpdateProcessorFactory"/>
-        <processor class="solr.RunUpdateProcessorFactory"/>
-    </updateRequestProcessorChain>
+  <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
+    <arr name="format">
+      <str>yyyy-MM-dd</str>
+      <str>yyyy</str>
+    </arr>
+  </updateProcessor>
+  <updateRequestProcessorChain name="defaultWithParseDate" default="true"
+                               processor="parse-date">
+    <processor class="solr.LogUpdateProcessorFactory"/>
+    <processor class="solr.DistributedUpdateProcessorFactory"/>
+    <processor class="solr.RunUpdateProcessorFactory"/>
+  </updateRequestProcessorChain>
 
-    <dataDir>${solr.data.dir:}</dataDir>
+  <dataDir>${solr.data.dir:}</dataDir>
 
-    <query>
-        <maxBooleanClauses>1024</maxBooleanClauses>
-        <filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0"/>
-        <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
-        <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
-        <!-- custom cache currently used by block join -->
-        <cache name="perSegFilter" class="solr.search.LRUCache" size="10" initialSize="0" autowarmCount="10" regenerator="solr.NoOpRegenerator"/>
-        <enableLazyFieldLoading>true</enableLazyFieldLoading>
-        <queryResultWindowSize>20</queryResultWindowSize>
-        <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+  <query>
+    <maxBooleanClauses>1024</maxBooleanClauses>
+    <filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <!-- custom cache currently used by block join -->
+    <cache name="perSegFilter" class="solr.search.LRUCache" size="10" initialSize="0" autowarmCount="10"
+           regenerator="solr.NoOpRegenerator"/>
+    <enableLazyFieldLoading>true</enableLazyFieldLoading>
+    <queryResultWindowSize>20</queryResultWindowSize>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
 
-        <listener event="newSearcher" class="solr.QuerySenderListener"><arr name="queries"/></listener>
-        <listener event="firstSearcher" class="solr.QuerySenderListener"><arr name="queries"/></listener>
-        <useColdSearcher>false</useColdSearcher>
-    </query>
+    <listener event="newSearcher" class="solr.QuerySenderListener">
+      <arr name="queries"/>
+    </listener>
+    <listener event="firstSearcher" class="solr.QuerySenderListener">
+      <arr name="queries"/>
+    </listener>
+    <useColdSearcher>false</useColdSearcher>
+  </query>
 
-    <requestDispatcher><httpCaching never304="true"/></requestDispatcher>
+  <requestDispatcher>
+    <httpCaching never304="true"/>
+  </requestDispatcher>
 
-    <requestHandler name="/select" class="solr.SearchHandler">
-        <lst name="defaults">
-            <str name="echoParams">explicit</str>
-            <int name="rows">10</int>
-        </lst>
-    </requestHandler>
+  <requestHandler name="/select" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <int name="rows">10</int>
+    </lst>
+  </requestHandler>
 
-    <requestHandler name="/query" class="solr.SearchHandler">
-        <lst name="defaults">
-            <str name="echoParams">explicit</str>
-            <str name="wt">json</str>
-            <str name="indent">true</str>
-        </lst>
-    </requestHandler>
+  <requestHandler name="/query" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="wt">json</str>
+      <str name="indent">true</str>
+    </lst>
+  </requestHandler>
 
-    <lib dir="${solr.install.dir:}/dist/" regex="solr-velocity-\d.*\.jar"/>
-    <lib dir="${solr.install.dir:}/contrib/velocity/lib" regex=".*\.jar"/>
-    <requestHandler name="/browse" class="solr.SearchHandler" useParams="query,facets,velocity,browse">
-        <lst name="defaults">
-            <str name="echoParams">explicit</str>
-            <str name="facet">on</str>
-            <str name="facet.field">year</str>
-            <str name="facet.field">journal</str>
-            <str name="facet.field">author</str>
-        </lst>
-    </requestHandler>
+  <lib dir="${solr.install.dir:}/dist/" regex="solr-velocity-\d.*\.jar"/>
+  <lib dir="${solr.install.dir:}/contrib/velocity/lib" regex=".*\.jar"/>
+  <requestHandler name="/browse" class="solr.SearchHandler" useParams="query,facets,velocity,browse">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="facet">on</str>
+      <str name="facet.field">year</str>
+      <str name="facet.field">journal</str>
+      <str name="facet.field">author</str>
+    </lst>
+  </requestHandler>
 
-    <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
-        <lst name="defaults">
-            <str name="df">_text_</str>
-        </lst>
-    </initParams>
+  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
+    <lst name="defaults">
+      <str name="df">_text_</str>
+    </lst>
+  </initParams>
 
 
-    <searchComponent name="authorsuggest" class="solr.SuggestComponent">
-        <lst name="suggester">
-            <str name="name">default</str>
-            <str name="lookupImpl">FuzzyLookupFactory</str>
-            <str name="dictionaryImpl">DocumentDictionaryFactory</str>
-            <str name="field">author</str>
-            <str name="suggestAnalyzerFieldType">string</str>
-            <str name="buildOnStartup">false</str>
-        </lst>
-    </searchComponent>
+  <searchComponent name="authorsuggest" class="solr.SuggestComponent">
+    <lst name="suggester">
+      <str name="name">default</str>
+      <str name="lookupImpl">FuzzyLookupFactory</str>
+      <str name="dictionaryImpl">DocumentDictionaryFactory</str>
+      <str name="field">author</str>
+      <str name="suggestAnalyzerFieldType">string</str>
+      <str name="buildOnStartup">false</str>
+    </lst>
+  </searchComponent>
 
-    <requestHandler name="/authors" class="solr.SearchHandler" startup="lazy">
-        <lst name="defaults">
-            <str name="suggest">true</str>
-            <str name="suggest.count">10</str>
-        </lst>
-        <arr name="components">
-            <str>authorsuggest</str>
-        </arr>
-    </requestHandler>
+  <requestHandler name="/authors" class="solr.SearchHandler" startup="lazy">
+    <lst name="defaults">
+      <str name="suggest">true</str>
+      <str name="suggest.count">10</str>
+    </lst>
+    <arr name="components">
+      <str>authorsuggest</str>
+    </arr>
+  </requestHandler>
 
-    <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
-        <str name="template.base.dir">${velocity.template.base.dir:}</str>
-        <str name="solr.resource.loader.enabled">${velocity.solr.resource.loader.enabled:true}</str>
-        <str name="params.resource.loader.enabled">${velocity.params.resource.loader.enabled:false}</str>
-    </queryResponseWriter>
+  <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
+    <str name="template.base.dir">${velocity.template.base.dir:}</str>
+    <str name="solr.resource.loader.enabled">${velocity.solr.resource.loader.enabled:true}</str>
+    <str name="params.resource.loader.enabled">${velocity.params.resource.loader.enabled:false}</str>
+  </queryResponseWriter>
 
-    <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
-        <int name="xsltCacheLifetimeSeconds">5</int>
-    </queryResponseWriter>
+  <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
+    <int name="xsltCacheLifetimeSeconds">5</int>
+  </queryResponseWriter>
 
 </config>
