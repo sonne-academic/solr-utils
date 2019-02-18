@@ -37,6 +37,9 @@ async def main():
     await streaming(paper_w_citations)
     # r = s.collection('s2').graph.expr(traverse_out)
     # print(r.text)
+
+    # search for an authors name via faceting:
+    # http://localhost:8983/solr/s2/select?f.authors.name.facet.contains=Ropinski&facet.field=authors.name&facet=on&q=authors.name:*Ropinski*&rows=0
     print(f'sent: {paper_w_citations}')
 
 if __name__ == '__main__':
