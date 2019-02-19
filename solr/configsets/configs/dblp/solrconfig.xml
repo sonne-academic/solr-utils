@@ -6,6 +6,10 @@
     <updateLog>
       <str name="dir">${solr.data.dir:}</str>
     </updateLog>
+    <autoCommit>
+      <maxTime>${solr.autoCommit.maxTime:15000}</maxTime>
+      <openSearcher>false</openSearcher>
+    </autoCommit>
   </updateHandler>
 
   <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
