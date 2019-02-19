@@ -155,7 +155,7 @@
   <field name="_version_" type="plong" indexed="false" stored="false"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
-  <field name="authors.name" type="strings"/>
+  <field name="author" type="strings"/>
   <field name="entities" type="strings"/>
   <field name="inCitations" type="strings"/>
   <field name="outCitations" type="strings"/>
@@ -173,9 +173,16 @@
   <field name="venue" type="string"/>
   <field name="journalVolume" type="string"/>
 
-  <field name="authors.ids" type="strings"/>
+  <!--removed author ids since their irrelevant for this application-->
+  <!--<field name="authors.ids" type="strings"/>-->
   <field name="year" type="plong"/>
 
   <field name="paperAbstract" type="text_general" multiValued="false"/>
+
+  <!-- additional fields from preprocessing -->
+  <field name="author_count" type="pint"/>
+  <field name="inCitations_count" type="pint"/>
+  <field name="outCitations_count" type="pint"/>
+  <field name="entities_count" type="pint"/>
 
 </schema>
