@@ -63,4 +63,28 @@
   <field name="year"  type="pdate"/>
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
+
+  <fieldType name="text_lower" class="solr.TextField" stored="false" multiValued="true" positionIncrementGap="100">
+    <analyzer>
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <field name="author_lower" type="text_lower"/>
+  <copyField source="author" dest="author_lower"/>
+
+  <fieldType name="text_prefix" class="solr.TextField" stored="false" multiValued="true" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+      <filter class="solr.EdgeNGramFilterFactory" minGramSize="2" maxGramSize="15"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <field name="author_ngram" type="text_prefix"/>
+  <copyField source="author" dest="author_ngram"/>
+
 </schema>
