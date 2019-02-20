@@ -50,6 +50,7 @@ def build_docs(it):
         build_fields(doc, it)
         yield ET.tostring(doc, encoding='utf-8')
         yield b'\n'
+        root.clear()
 
 
 def build_upload_document():
