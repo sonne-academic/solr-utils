@@ -64,16 +64,24 @@
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
 
-  <fieldType name="text_lower" class="solr.TextField" stored="false" multiValued="true" positionIncrementGap="100">
+  <!-- these fields (types) are used by the /suggest/* request handlers -->
+  <!--if stored="false", highlighting will no longer work!-->
+  <fieldType name="text_lower" class="solr.TextField" multiValued="true" positionIncrementGap="100">
     <analyzer>
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_lower" type="text_lower"/>
-  <copyField source="author" dest="author_lower"/>
+  <field name="author_lower"    type="text_lower"/>
+  <field name="booktitle_lower" type="text_lower"/>
+  <field name="title_lower"     type="text_lower"/>
+  <field name="journal_lower"   type="text_lower"/>
+  <copyField source="author"    dest="author_lower"/>
+  <copyField source="booktitle" dest="booktitle_lower"/>
+  <copyField source="title"     dest="title_lower"/>
+  <copyField source="journal"   dest="journal_lower"/>
 
-  <fieldType name="text_prefix" class="solr.TextField" stored="false" multiValued="true" positionIncrementGap="100">
+  <fieldType name="text_prefix" class="solr.TextField" multiValued="true" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
@@ -84,7 +92,13 @@
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_ngram" type="text_prefix"/>
-  <copyField source="author" dest="author_ngram"/>
+  <field name="author_ngram"    type="text_prefix"/>
+  <field name="booktitle_ngram" type="text_prefix"/>
+  <field name="title_ngram"     type="text_prefix"/>
+  <field name="journal_ngram"   type="text_prefix"/>
+  <copyField source="author"    dest="author_ngram"/>
+  <copyField source="booktitle" dest="booktitle_ngram"/>
+  <copyField source="title"     dest="title_ngram"/>
+  <copyField source="journal"   dest="journal_ngram"/>
 
 </schema>
