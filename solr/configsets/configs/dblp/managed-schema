@@ -19,17 +19,17 @@
     <analyzer type="query"><tokenizer class="solr.KeywordTokenizerFactory"/></analyzer>
   </fieldType>
 
-  <uniqueKey>key</uniqueKey>
+  <uniqueKey>id</uniqueKey>
 
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
 
-  <field name="key" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="key_ancestor" type="ancestor_path" multiValued="false" indexed="true" stored="true"/>
-  <field name="key_descendent" type="descendent_path" multiValued="false" indexed="true" stored="true"/>
-  <copyField source="key" dest="key_ancestor" maxChars="256"/>
-  <copyField source="key" dest="key_descendent" maxChars="256"/>
+  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+  <field name="id_ancestor" type="ancestor_path" multiValued="false" indexed="true" stored="true"/>
+  <field name="id_descendent" type="descendent_path" multiValued="false" indexed="true" stored="true"/>
+  <copyField source="id" dest="id_ancestor" maxChars="256"/>
+  <copyField source="id" dest="id_descendent" maxChars="256"/>
 
   <field name="pub_type" type="pub_type"/>
   <copyField source="pub_type" dest="pub_type_str" maxChars="256"/>
