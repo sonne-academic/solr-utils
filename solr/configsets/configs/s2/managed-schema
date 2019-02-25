@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Solr managed schema - automatically generated - DO NOT EDIT -->
 <schema name="default-config" version="1.6">
-  <uniqueKey>id</uniqueKey>
   <fieldType name="binary" class="solr.BinaryField"/>
   <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
   <fieldType name="booleans" class="solr.BoolField" sortMissingLast="true" multiValued="true"/>
@@ -149,29 +148,30 @@
     </analyzer>
   </fieldType>
 
+  <uniqueKey>id</uniqueKey>
+  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
-  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
   <field name="author" type="strings"/>
-  <field name="entities" type="strings"/>
+  <field name="keywords" type="strings"/>
   <field name="inCitations" type="strings"/>
   <field name="outCitations" type="strings"/>
   <field name="pdfUrls" type="strings"/>
-  <field name="sources" type="strings"/>
+  <field name="sources" type="strings"/> <!-- this is "Medline", "DBLP" or both-->
 
   <field name="doi" type="string"/>
   <field name="doiUrl" type="string"/>
-  <field name="journalName" type="string"/>
-  <field name="journalPages" type="string"/>
+  <field name="journal" type="string"/>
+  <field name="pages" type="string"/>
   <field name="pmid" type="string"/>
   <field name="s2PdfUrl" type="string"/>
   <field name="s2Url" type="string"/>
   <field name="title" type="string"/>
   <field name="venue" type="string"/>
-  <field name="journalVolume" type="string"/>
+  <field name="volume" type="string"/>
 
   <!--removed author ids since their irrelevant for this application-->
   <!--<field name="authors.ids" type="strings"/>-->
@@ -183,6 +183,51 @@
   <field name="author_count" type="pint"/>
   <field name="inCitations_count" type="pint"/>
   <field name="outCitations_count" type="pint"/>
-  <field name="entities_count" type="pint"/>
+  <field name="keywords_count" type="pint"/>
+
+  <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
+  <field name="suggest" type="suggest_type"/>
+
+    <!-- these fields (types) are used by the /suggest/* request handlers -->
+  <!--if stored="false", highlighting will no longer work!-->
+  <fieldType name="text_lower" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+    <analyzer>
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <field name="author_lower"  type="text_lower"/>
+  <field name="venue_lower"   type="text_lower"/>
+  <field name="title_lower"   type="text_lower"/>
+  <field name="journal_lower" type="text_lower"/>
+  <field name="suggest_lower"   type="text_lower"/>
+  <copyField source="suggest"    dest="suggest_lower"/>
+
+  <copyField source="author"  dest="author_lower"/>
+  <copyField source="venue"   dest="venue_lower"/>
+  <copyField source="title"   dest="title_lower"/>
+  <copyField source="journal" dest="journal_lower"/>
+
+  <fieldType name="text_prefix" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+      <filter class="solr.EdgeNGramFilterFactory" minGramSize="2" maxGramSize="15"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <field name="author_ngram"   type="text_prefix"/>
+  <field name="venue_ngram"    type="text_prefix"/>
+  <field name="title_ngram"    type="text_prefix"/>
+  <field name="journal_ngram"  type="text_prefix"/>
+  <field name="suggest_ngram"   type="text_prefix"/>
+  <copyField source="suggest"    dest="suggest_ngram"/>
+  <copyField source="author"   dest="author_ngram"/>
+  <copyField source="venue"    dest="venue_ngram"/>
+  <copyField source="title"    dest="title_ngram"/>
+  <copyField source="journal"  dest="journal_ngram"/>
 
 </schema>
