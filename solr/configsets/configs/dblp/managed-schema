@@ -64,6 +64,9 @@
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
 
+  <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
+  <field name="suggest" type="suggest_type"/>
+
   <!-- these fields (types) are used by the /suggest/* request handlers -->
   <!--if stored="false", highlighting will no longer work!-->
   <fieldType name="text_lower" class="solr.TextField" multiValued="true" positionIncrementGap="100">
@@ -76,6 +79,8 @@
   <field name="booktitle_lower" type="text_lower"/>
   <field name="title_lower"     type="text_lower"/>
   <field name="journal_lower"   type="text_lower"/>
+  <field name="suggest_lower"   type="text_lower"/>
+  <copyField source="suggest"    dest="suggest_lower"/>
   <copyField source="author"    dest="author_lower"/>
   <copyField source="booktitle" dest="booktitle_lower"/>
   <copyField source="title"     dest="title_lower"/>
@@ -96,6 +101,8 @@
   <field name="booktitle_ngram" type="text_prefix"/>
   <field name="title_ngram"     type="text_prefix"/>
   <field name="journal_ngram"   type="text_prefix"/>
+  <field name="suggest_ngram"   type="text_prefix"/>
+  <copyField source="suggest"    dest="suggest_ngram"/>
   <copyField source="author"    dest="author_ngram"/>
   <copyField source="booktitle" dest="booktitle_ngram"/>
   <copyField source="title"     dest="title_ngram"/>
