@@ -60,7 +60,7 @@
   <field name="url"       type="important_strings"/>
   <field name="volume"    type="important_strings"/>
 
-  <field name="year"  type="pdate"/>
+  <field name="year"  type="pint"/>
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
 
