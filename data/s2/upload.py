@@ -96,7 +96,7 @@ def batch_jsonl(generator, batchsize):
 
 
 def upload_parallel(generator, session):
-    with Pool(processes=1) as pool:
+    with Pool(processes=cpu_count()) as pool:
         yield from pool.imap(session.collection('s2').update.jsonl, generator)
 
 
