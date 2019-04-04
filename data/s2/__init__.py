@@ -5,7 +5,7 @@ DATA_FOLDER = DATA_HOME / 's2nex'
 
 
 def file_list():
-    for i in range(46):
+    for i in range(47):
         yield DATA_FOLDER / f's2-corpus-{i:02d}.gz'
 
 

@@ -56,8 +56,6 @@
   <fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true"/>
   <fieldType name="point" class="solr.PointType" subFieldSuffix="_d" dimension="2"/>
   <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
-  <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true"/>
-  <fieldType name="strings" class="solr.StrField" sortMissingLast="true" docValues="true" multiValued="true"/>
 
   <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
     <analyzer type="index">
@@ -148,6 +146,11 @@
     </analyzer>
   </fieldType>
 
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true"/>
+  <fieldType name="strings" class="solr.StrField" sortMissingLast="true" docValues="true" multiValued="true" positionIncrementGap="100"/>
+  <fieldType name="important_strings" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="important_string" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
+
   <uniqueKey>id</uniqueKey>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
@@ -155,34 +158,34 @@
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
 
-  <field name="author" type="strings"/>
-  <field name="keywords" type="strings"/>
-  <field name="inCitations" type="strings"/>
-  <field name="outCitations" type="strings"/>
-  <field name="pdfUrls" type="strings"/>
-  <field name="sources" type="strings"/> <!-- this is "Medline", "DBLP" or both-->
+  <field name="author" type="important_strings"/>
+  <field name="keywords" type="important_strings"/>
+  <field name="references" type="important_strings"/>
+  <field name="cited_by" type="important_strings"/>
+  <field name="urls" type="important_strings"/>
+  <field name="sources" type="important_strings"/> <!-- this is "Medline", "DBLP" or both-->
 
-  <field name="doi" type="string"/>
-  <field name="doiUrl" type="string"/>
-  <field name="journal" type="string"/>
-  <field name="pages" type="string"/>
-  <field name="pmid" type="string"/>
-  <field name="s2PdfUrl" type="string"/>
-  <field name="s2Url" type="string"/>
-  <field name="title" type="string"/>
-  <field name="venue" type="string"/>
-  <field name="volume" type="string"/>
+  <field name="doi" type="important_string"/>
+  <field name="doiUrl" type="important_string"/>
+  <field name="journal" type="important_string"/>
+  <field name="pages" type="important_string"/>
+  <field name="pmid" type="important_string"/>
+  <field name="s2PdfUrl" type="important_string"/>
+  <field name="source_url" type="important_string"/>
+  <field name="title" type="important_string"/>
+  <field name="venue" type="important_string"/>
+  <field name="volume" type="important_string"/>
 
   <!--removed author ids since their irrelevant for this application-->
   <!--<field name="authors.ids" type="strings"/>-->
   <field name="year" type="plong"/>
 
-  <field name="paperAbstract" type="text_general" multiValued="false"/>
+  <!--<field name="abstract" type="text_general" multiValued="false"/>-->
 
   <!-- additional fields from preprocessing -->
   <field name="author_count" type="pint"/>
-  <field name="inCitations_count" type="pint"/>
-  <field name="outCitations_count" type="pint"/>
+  <field name="references_count" type="pint"/>
+  <field name="cited_by_count" type="pint"/>
   <field name="keywords_count" type="pint"/>
 
   <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
@@ -190,25 +193,25 @@
 
     <!-- these fields (types) are used by the /suggest/* request handlers -->
   <!--if stored="false", highlighting will no longer work!-->
-  <fieldType name="text_lower" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+  <fieldType name="text_lower" class="solr.TextField" multiValued="false" positionIncrementGap="100">
     <analyzer>
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_lower"  type="text_lower"/>
-  <field name="venue_lower"   type="text_lower"/>
-  <field name="title_lower"   type="text_lower"/>
-  <field name="journal_lower" type="text_lower"/>
+  <!--<field name="author_lower"  type="text_lower"/>-->
+  <!--<field name="venue_lower"   type="text_lower"/>-->
+  <!--<field name="title_lower"   type="text_lower"/>-->
+  <!--<field name="journal_lower" type="text_lower"/>-->
   <field name="suggest_lower"   type="text_lower"/>
   <copyField source="suggest"    dest="suggest_lower"/>
 
-  <copyField source="author"  dest="author_lower"/>
-  <copyField source="venue"   dest="venue_lower"/>
-  <copyField source="title"   dest="title_lower"/>
-  <copyField source="journal" dest="journal_lower"/>
+  <!--<copyField source="author"  dest="author_lower"/>-->
+  <!--<copyField source="venue"   dest="venue_lower"/>-->
+  <!--<copyField source="title"   dest="title_lower"/>-->
+  <!--<copyField source="journal" dest="journal_lower"/>-->
 
-  <fieldType name="text_prefix" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+  <fieldType name="text_prefix" class="solr.TextField" multiValued="false" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
@@ -219,15 +222,15 @@
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_ngram"   type="text_prefix"/>
-  <field name="venue_ngram"    type="text_prefix"/>
-  <field name="title_ngram"    type="text_prefix"/>
-  <field name="journal_ngram"  type="text_prefix"/>
+  <!--<field name="author_ngram"   type="text_prefix"/>-->
+  <!--<field name="venue_ngram"    type="text_prefix"/>-->
+  <!--<field name="title_ngram"    type="text_prefix"/>-->
+  <!--<field name="journal_ngram"  type="text_prefix"/>-->
   <field name="suggest_ngram"   type="text_prefix"/>
   <copyField source="suggest"    dest="suggest_ngram"/>
-  <copyField source="author"   dest="author_ngram"/>
-  <copyField source="venue"    dest="venue_ngram"/>
-  <copyField source="title"    dest="title_ngram"/>
-  <copyField source="journal"  dest="journal_ngram"/>
+  <!--<copyField source="author"   dest="author_ngram"/>-->
+  <!--<copyField source="venue"    dest="venue_ngram"/>-->
+  <!--<copyField source="title"    dest="title_ngram"/>-->
+  <!--<copyField source="journal"  dest="journal_ngram"/>-->
 
 </schema>

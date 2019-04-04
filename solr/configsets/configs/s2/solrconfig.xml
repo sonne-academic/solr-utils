@@ -213,33 +213,33 @@ https://lucene.apache.org/solr/guide/7_4/function-queries.html
     </lst>
   </requestHandler>
 
-  <requestHandler class="solr.SearchHandler" name="/suggest/author" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">author</str>
-      <str name="qf">author_lower^10 author_ngram</str>
-    </lst>
-  </requestHandler>
+  <!--<requestHandler class="solr.SearchHandler" name="/suggest/author" useParams="suggest">-->
+    <!--<lst name="defaults">-->
+      <!--<str name="fl">author</str>-->
+      <!--<str name="qf">author_lower^10 author_ngram</str>-->
+    <!--</lst>-->
+  <!--</requestHandler>-->
 
-  <requestHandler class="solr.SearchHandler" name="/suggest/venue" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">venue</str>
-      <str name="qf">venue_lower^10 venue_ngram</str>
-    </lst>
-  </requestHandler>
+  <!--<requestHandler class="solr.SearchHandler" name="/suggest/venue" useParams="suggest">-->
+    <!--<lst name="defaults">-->
+      <!--<str name="fl">venue</str>-->
+      <!--<str name="qf">venue_lower^10 venue_ngram</str>-->
+    <!--</lst>-->
+  <!--</requestHandler>-->
 
-  <requestHandler class="solr.SearchHandler" name="/suggest/title" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">title</str>
-      <str name="qf">title_lower^10 title_ngram</str>
-    </lst>
-  </requestHandler>
+  <!--<requestHandler class="solr.SearchHandler" name="/suggest/title" useParams="suggest">-->
+    <!--<lst name="defaults">-->
+      <!--<str name="fl">title</str>-->
+      <!--<str name="qf">title_lower^10 title_ngram</str>-->
+    <!--</lst>-->
+  <!--</requestHandler>-->
 
-  <requestHandler class="solr.SearchHandler" name="/suggest/journal" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">journal</str>
-      <str name="qf">journal_lower^10 journal_ngram</str>
-    </lst>
-  </requestHandler>
+  <!--<requestHandler class="solr.SearchHandler" name="/suggest/journal" useParams="suggest">-->
+    <!--<lst name="defaults">-->
+      <!--<str name="fl">journal</str>-->
+      <!--<str name="qf">journal_lower^10 journal_ngram</str>-->
+    <!--</lst>-->
+  <!--</requestHandler>-->
 
 
 </config>
