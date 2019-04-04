@@ -16,6 +16,7 @@ def add_field(doc, name, text):
 
 
 def build_fields(doc, it):
+    # once we arrive here, the first start event is already consumed
     depth = 0
     things = []
     for evt, ele in it:
@@ -85,6 +86,12 @@ def write_to_zstd():
             for content in build_upload_document():
                 compressor.write(content)
 
+def yield_from_zst():
+    cctx = zstd.ZstdDecompressor()
+    with open(DATA_FOLDER / 'dblp_docs.xml.zst', 'wb') as file, cctx.stream_reader(file) as decompressor:
+        print(decompressor.readline())
+
 
 if __name__ == '__main__':
-    write_to_gzip()
+    # write_to_gzip()
+    yield_from_zst()

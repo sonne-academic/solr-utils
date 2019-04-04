@@ -26,15 +26,22 @@
   <field name="_version_" type="plong" indexed="false" stored="false"/>
 
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="id_ancestor" type="ancestor_path" multiValued="false" indexed="true" stored="true"/>
-  <field name="id_descendent" type="descendent_path" multiValued="false" indexed="true" stored="true"/>
-  <copyField source="id" dest="id_ancestor" maxChars="256"/>
-  <copyField source="id" dest="id_descendent" maxChars="256"/>
+  <!--<field name="id_ancestor" type="ancestor_path" multiValued="false" indexed="true" stored="true"/>-->
+  <!--<field name="id_descendent" type="descendent_path" multiValued="false" indexed="true" stored="true"/>-->
+  <!--<copyField source="id" dest="id_ancestor" maxChars="256"/>-->
+  <!--<copyField source="id" dest="id_descendent" maxChars="256"/>-->
 
-  <field name="pub_type" type="pub_type"/>
-  <copyField source="pub_type" dest="pub_type_str" maxChars="256"/>
+  <!--<fieldType name="html_title" class="solr.TextField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false">-->
+    <!--<analyzer>-->
+      <!--<charFilter class="solr.HTMLStripCharFilterFactory"/>-->
+      <!--<tokenizer class="solr.WhitespaceTokenizerFactory" rule="java" />-->
+    <!--</analyzer>-->
+  <!--</fieldType>-->
 
-  <field name="pub_type_str"  type="important_string"/>
+  <!--<field name="pub_type" type="pub_type"/>-->
+  <!--<copyField source="pub_type" dest="pub_type_str" maxChars="256"/>-->
+
+  <field name="doc_type"      type="important_string"/>
   <field name="publtype"      type="important_string"/>
   <field name="address"       type="important_string"/>
   <field name="booktitle"     type="important_string"/>
@@ -43,6 +50,7 @@
   <field name="month"         type="important_string"/>
   <field name="number"        type="important_string"/>
   <field name="title"         type="important_string"/>
+  <field name="doi"           type="important_string"/>
 
   <field name="author"    type="important_strings"/>
   <field name="cdrom"     type="important_strings"/>
@@ -60,7 +68,9 @@
   <field name="url"       type="important_strings"/>
   <field name="volume"    type="important_strings"/>
 
-  <field name="year"  type="pint"/>
+  <field name="year"          type="pint"/>
+  <field name="author_count"  type="pint"/>
+
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
 
@@ -69,24 +79,16 @@
 
   <!-- these fields (types) are used by the /suggest/* request handlers -->
   <!--if stored="false", highlighting will no longer work!-->
-  <fieldType name="text_lower" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+  <fieldType name="text_lower" class="solr.TextField" multiValued="false" positionIncrementGap="100">
     <analyzer>
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_lower"    type="text_lower"/>
-  <field name="booktitle_lower" type="text_lower"/>
-  <field name="title_lower"     type="text_lower"/>
-  <field name="journal_lower"   type="text_lower"/>
   <field name="suggest_lower"   type="text_lower"/>
   <copyField source="suggest"    dest="suggest_lower"/>
-  <copyField source="author"    dest="author_lower"/>
-  <copyField source="booktitle" dest="booktitle_lower"/>
-  <copyField source="title"     dest="title_lower"/>
-  <copyField source="journal"   dest="journal_lower"/>
 
-  <fieldType name="text_prefix" class="solr.TextField" multiValued="true" positionIncrementGap="100">
+  <fieldType name="text_prefix" class="solr.TextField" multiValued="false" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
@@ -97,15 +99,7 @@
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="author_ngram"    type="text_prefix"/>
-  <field name="booktitle_ngram" type="text_prefix"/>
-  <field name="title_ngram"     type="text_prefix"/>
-  <field name="journal_ngram"   type="text_prefix"/>
   <field name="suggest_ngram"   type="text_prefix"/>
   <copyField source="suggest"    dest="suggest_ngram"/>
-  <copyField source="author"    dest="author_ngram"/>
-  <copyField source="booktitle" dest="booktitle_ngram"/>
-  <copyField source="title"     dest="title_ngram"/>
-  <copyField source="journal"   dest="journal_ngram"/>
 
 </schema>

@@ -10,9 +10,11 @@ def get_evt():
         with gzip.open(file, 'rb') as xf:
             yield from ET.iterparse(xf, ['start', 'end'], load_dtd=True)
 
-
+note_attribs_map = {'type': []}
+known_elements_with_attr = ['note']
 def build_fields(it):
     depth = 0
+    doprint = False
     for evt, ele in it:
         if 'start' == evt:
             depth += 1
@@ -25,14 +27,35 @@ def build_fields(it):
         if -1 == depth:
             # document ends
             break
-        if 0 == depth:
-            yield ele.tag, ele.text
+        if 0 != depth:
+            # ignore deeper nested tags
             continue
 
-        # ignore all deeper nested elements
-        assert 0 < depth
-        if 1 < depth:
-            print(depth, ele.tag, ele.text)
+        if 'title' == ele.tag:
+            realtitle = ET.tostring(ele, encoding='unicode').replace('<title>','').replace('</title>','').strip()
+            if doprint:
+                print(depth, ele.tag, realtitle)
+            yield 'title', realtitle
+            continue
+        if 'note' == ele.tag:
+            for k,v in ele.attrib.items():
+                if k not in note_attribs_map:
+                    print(f'new attr: {k}')
+                    note_attribs_map[k] = []
+                if v not in note_attribs_map[k]:
+                    if 'label' != k:
+                        print(f'new value for attrib "{k}": {v}')
+                        note_attribs_map[k].append(v)
+            attrs = ','.join([f'[{k}:{v}]' for k,v in ele.attrib.items()])
+            yield ele.tag, f'({attrs}): {ele.text}'
+            continue
+        elif len(list(ele.attrib.keys())) != 0:
+            pass
+            # print(f'')
+
+        yield ele.tag, ele.text
+        continue
+
 
 
 def build_docs(it):
@@ -54,13 +77,21 @@ def build_docs(it):
         assert 'pub_type' not in doc
         doc['pub_type'] = root.tag
         for k,v in build_fields(it):
+            if v is None:
+                print(f'warning: empty value encountered for key {k}')
+                continue
             if k not in doc:
                 doc[k] = v
                 continue
             if type(doc[k]) is str:
                 prev = doc.pop(k)
                 doc[k] = [prev]
-            assert type(doc[k]) is list
+
+            if type(doc[k]) is not list:
+                temp: bytes = ET.tostring(root, encoding='utf-8')
+                print(temp.decode('utf-8'))
+                # print(f'{k}: {doc[k]} is not list, but {type(doc[k])}')
+                raise AssertionError(f'{k}: {doc[k]} is not list, but {type(doc[k])}')
             doc[k].append(v)
         yield json.dumps(doc, ensure_ascii=False).encode('utf-8')
         yield b'\n'

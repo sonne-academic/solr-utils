@@ -20,6 +20,13 @@
   </updateProcessor>
 
   <updateRequestProcessorChain name="defaultWithParseDate" default="true" processor="parse-date">
+    <!-- needed for title, since it contains HTML markup -->
+    <processor name="strip-html" class="solr.HTMLStripFieldUpdateProcessorFactory">
+      <str name="typeClass">solr.StrField</str>
+    </processor>
+    <!-- when this is executed before HTML stripping, the HTMLMarkup is preserved -->
+    <!--TODO can possible abuse this to keep HTML around, i.e. copy to something
+        of type textfield (cannot be solr.StrField) -->
     <processor class="solr.CloneFieldUpdateProcessorFactory" name="clone-suggest">
       <arr name="source">
         <str>title</str>
@@ -30,9 +37,21 @@
     </processor>
     <processor class="solr.ConcatFieldUpdateProcessorFactory">
       <str name="delimiter"> ; </str>
-      <!--<lst name="exclude">-->
-        <!--<str name="fieldName">primary_author</str>-->
-      <!--</lst>-->
+      <lst name="exclude">
+        <str name="fieldName">url</str>
+        <str name="fieldName">pub_type_str</str>
+        <str name="fieldName">publtype</str>
+        <str name="fieldName">address</str>
+        <str name="fieldName">booktitle</str>
+        <str name="fieldName">chapter</str>
+        <str name="fieldName">journal</str>
+        <str name="fieldName">month</str>
+        <str name="fieldName">number</str>
+        <str name="fieldName">title</str>
+        <str name="fieldName">year</str>
+        <str name="fieldName">mdate</str>
+        <str name="fieldName">cdate</str>
+      </lst>
     </processor>
     <!--<processor class="solr.FirstFieldValueUpdateProcessorFactory">-->
       <!--<str name="fieldName">primary_author</str>-->
@@ -84,29 +103,12 @@
     </lst>
   </requestHandler>
 
-  <lib dir="${solr.install.dir:}/dist/" regex="solr-velocity-\d.*\.jar"/>
-  <lib dir="${solr.install.dir:}/contrib/velocity/lib" regex=".*\.jar"/>
-  <requestHandler name="/browse" class="solr.SearchHandler" useParams="query,facets,velocity,browse">
-    <lst name="defaults">
-      <str name="echoParams">explicit</str>
-      <str name="facet">on</str>
-      <str name="facet.field">year</str>
-      <str name="facet.field">journal</str>
-      <str name="facet.field">author</str>
-    </lst>
-  </requestHandler>
 
-  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
+  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell">
     <lst name="defaults">
       <str name="df">_text_</str>
     </lst>
   </initParams>
-
-  <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
-    <str name="template.base.dir">${velocity.template.base.dir:}</str>
-    <str name="solr.resource.loader.enabled">${velocity.solr.resource.loader.enabled:true}</str>
-    <str name="params.resource.loader.enabled">${velocity.params.resource.loader.enabled:false}</str>
-  </queryResponseWriter>
 
   <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
     <int name="xsltCacheLifetimeSeconds">5</int>
@@ -118,34 +120,5 @@
       <str name="qf">suggest_lower^10 suggest_ngram</str>
     </lst>
   </requestHandler>
-
-  <requestHandler class="solr.SearchHandler" name="/suggest/author" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">author</str>
-      <str name="qf">author_lower^10 author_ngram</str>
-    </lst>
-  </requestHandler>
-
-  <requestHandler class="solr.SearchHandler" name="/suggest/booktitle" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">booktitle</str>
-      <str name="qf">booktitle_lower^10 booktitle_ngram</str>
-    </lst>
-  </requestHandler>
-
-  <requestHandler class="solr.SearchHandler" name="/suggest/title" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">title</str>
-      <str name="qf">title_lower^10 title_ngram</str>
-    </lst>
-  </requestHandler>
-
-  <requestHandler class="solr.SearchHandler" name="/suggest/journal" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">journal</str>
-      <str name="qf">journal_lower^10 journal_ngram</str>
-    </lst>
-  </requestHandler>
-
 
 </config>
