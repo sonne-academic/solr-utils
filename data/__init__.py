@@ -38,7 +38,7 @@ def batch_jsonl_unparsed(generator, batchsize=10_000):
     """
     while True:
         batch = itertools.islice(generator, batchsize)
-        batch = '\n,'.join(batch)
+        batch = '\n'.join(batch)
         if 0 < len(batch):
             yield batch.encode('utf-8')
         else:
@@ -81,7 +81,7 @@ def parse_jsonl_parallel(generator, processes=4):
 
 
 def upload_parallel(generator, session, collection):
-    with Pool(processes=cpu_count()) as pool:
+    with Pool(processes=cpu_count()*2) as pool:
         yield from pool.imap(session.collection(collection).update.jsonl, generator)
 
 
