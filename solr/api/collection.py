@@ -11,6 +11,7 @@ class SolrCollection:
         self._schema = SolrCollectionSchema(session, collection_name)
         self._stream = SolrStream(session, collection_name)
         self._graph = SolrGraph(session, collection_name)
+        self._get = SolrGet(session, collection_name)
 
     @property
     def schema(self):
@@ -28,6 +29,10 @@ class SolrCollection:
     def graph(self):
         return self._graph
 
+    @property
+    def get(self):
+        return self._get
+
     def search(self, query, requestHandler='/select', **kwargs):
         if query != '':
             kwargs['q'] = query
@@ -44,6 +49,22 @@ class SolrStream(SolrPathApi):
         }
         return self._get(params=params)
 
+
+class SolrGet(SolrPathApi):
+    def __init__(self, session, collection_name):
+        super().__init__(session, collection_name + '/get')
+
+    def id(self, _id):
+        params = {
+            'id': _id
+        }
+        return  self._get(params=params)
+
+    def ids(self, _ids):
+        params = {
+            'ids': _ids
+        }
+        return  self._post(json={'params':params})
 
 class SolrGraph(SolrPathApi):
     def __init__(self, session, collection_name):
@@ -64,7 +85,7 @@ class SolrCollectionUpdate(SolrPathApi):
         headers = {'Content-Type': 'text/xml'}
         return self._post(headers=headers, data=iterable)
 
-    def jsonl(self, iterable, commit=False):
+    def jsonl(self, iterable, commit=True):
         headers = {'Content-Type': 'application/json'}
         if commit:
             params = {
@@ -75,6 +96,18 @@ class SolrCollectionUpdate(SolrPathApi):
                 'commit': 'false'
             }
         return self.session._post_path(self.path + '/json/docs', headers=headers, params=params, data=iterable)
+
+    def jsonUpdate(self,iterable, commit=True):
+        headers = {'Content-Type': 'application/json'}
+        if commit:
+            params = {
+                'commit': 'true'
+            }
+        else:
+            params = {
+                'commit': 'false'
+            }
+        return self.session._post_path(self.path, headers=headers, params=params, data=iterable)
 
 
 class SolrCollectionSchema(SolrPathApi):
