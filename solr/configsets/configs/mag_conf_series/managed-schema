@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema name="default-config" version="1.6">
+  <fieldType name="pint" class="solr.IntPointField" docValues="true"/>
+  <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
+  <fieldType name="pdate" class="solr.DatePointField" docValues="true" stored="true"/>
+  <fieldType name="string" class="solr.StrField" docValues="true" sortMissingLast="true"/>
+  <fieldType name="strings" class="solr.StrField" docValues="true" multiValued="true" sortMissingLast="true"/>
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true"/>
+
+  <fieldType name="important_strings" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="important_string" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
+
+
+  <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
+  <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
+  <field name="_version_" type="plong" indexed="false" stored="false"/>
+
+  <uniqueKey>ConferenceSeriesId</uniqueKey>
+  <field name="ConferenceSeriesId" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+
+<field name="Rank" type="plong"/>
+<field name="NormalizedName" type="important_string"/>
+<field name="DisplayName" type="important_string"/>
+<field name="PaperCount" type="plong"/>
+<field name="CitationCount" type="plong"/>
+<field name="CreatedDate" type="important_string"/>
+</schema>

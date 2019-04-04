@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+  <luceneMatchVersion>7.7.0</luceneMatchVersion>
+
+  <lib dir="${solr.install.dir:}/dist/" regex="solr-dataimporthandler-.*\.jar"/>
+  <!--<lib dir="${solr.install.dir:}/dist/" regex="solr-cell-\d.*\.jar" />-->
+  <!--<lib dir="${solr.install.dir:}/dist/" regex="solr-clustering-\d.*\.jar" />-->
+  <!--<lib dir="${solr.install.dir:}/dist/" regex="solr-langid-\d.*\.jar" />-->
+  <lib dir="${solr.install.dir:}/dist/" regex="solr-velocity-\d.*\.jar" />
+
+  <!--<lib dir="${solr.install.dir:}/contrib/clustering/lib/" regex=".*\.jar" />-->
+  <!--<lib dir="${solr.install.dir:}/contrib/langid/lib/" regex=".*\.jar" />-->
+  <lib dir="${solr.install.dir:}/contrib/velocity/lib" regex=".*\.jar" />
+  <!--<lib dir="${solr.install.dir:}/contrib/extraction/lib" regex=".*\.jar" />-->
+  <!--<lib path="${solr.install.dir:}/contrib/dih-gz.jar" />-->
+  <!--<lib path="${solr.install.dir:}/contrib/unnamed.jar" />-->
+  <!-- an exact 'path' can be used instead of a 'dir' to specify a
+       specific jar file.  This will cause a serious error to be logged
+       if it can't be loaded.
+       <lib path="../a-jar-that-does-not-exist.jar" />
+  -->
+  <updateHandler>
+    <updateLog>
+      <str name="dir">${solr.data.dir:}</str>
+    </updateLog>
+    <autoCommit>
+      <maxTime>${solr.autoCommit.maxTime:15000}</maxTime>
+      <openSearcher>false</openSearcher>
+    </autoCommit>
+  </updateHandler>
+
+  <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
+    <arr name="format">
+      <str>yyyy-MM-dd</str>
+      <str>yyyy</str>
+    </arr>
+  </updateProcessor>
+  <updateRequestProcessorChain name="defaultWithParseDate" default="true" processor="parse-date">
+    <processor class="solr.CloneFieldUpdateProcessorFactory" name="clone-suggest">
+      <arr name="source">
+        <str>title</str>
+        <str>year</str>
+        <str>author</str>
+      </arr>
+      <str name="dest">suggest</str>
+    </processor>
+    <processor class="solr.ConcatFieldUpdateProcessorFactory">
+      <str name="delimiter"> ; </str>
+      <!--<lst name="exclude">-->
+        <!--<str name="fieldName">primary_author</str>-->
+      <!--</lst>-->
+    </processor>
+    <!--<processor class="solr.FirstFieldValueUpdateProcessorFactory">-->
+      <!--<str name="fieldName">primary_author</str>-->
+    <!--</processor>-->
+    <processor class="solr.LogUpdateProcessorFactory"/>
+    <processor class="solr.DistributedUpdateProcessorFactory"/>
+    <processor class="solr.RunUpdateProcessorFactory"/>
+  </updateRequestProcessorChain>
+
+  <dataDir>${solr.data.dir:}</dataDir>
+  <query>
+    <maxBooleanClauses>1024</maxBooleanClauses>
+    <filterCache class="solr.FastLRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0"/>
+    <!-- custom cache currently used by block join -->
+    <cache name="perSegFilter" class="solr.search.LRUCache" size="10" initialSize="0" autowarmCount="10" regenerator="solr.NoOpRegenerator" />
+    <enableLazyFieldLoading>true</enableLazyFieldLoading>
+    <queryResultWindowSize>20</queryResultWindowSize>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+
+    <listener event="newSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+        <!--
+            <lst><str name="q">solr</str><str name="sort">price asc</str></lst>
+            <lst><str name="q">rocks</str><str name="sort">weight asc</str></lst>
+        -->
+      </arr>
+    </listener>
+    <listener event="firstSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+        <!--
+            <lst>
+            <str name="q">static firstSearcher warming in solrconfig.xml</str>
+            </lst>
+        -->
+      </arr>
+    </listener>
+    <useColdSearcher>false</useColdSearcher>
+
+  </query>
+
+  <requestDispatcher>  <httpCaching never304="true" />  </requestDispatcher>
+
+  <requestHandler name="/select" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <int name="rows">10</int>
+    </lst>
+    <!-- If the default list of SearchComponents is not desired, that
+         list can either be overridden completely, or components can be
+         prepended or appended to the default list.  (see below)
+    -->
+    <!--
+	<arr name="components">
+        <str>nameOfCustomComponent1</str>
+        <str>nameOfCustomComponent2</str>
+	</arr>
+    -->
+  </requestHandler>
+
+  <requestHandler name="/query" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="wt">json</str>
+      <str name="indent">true</str>
+    </lst>
+  </requestHandler>
+
+  <!-- A Robust Example
+
+useParams are other default parameter sets, these come from the overlay config param.json.
+for example velocity adds <str name="wt">velocity</str> (and more).
+these parameter sets can be expanded by
+curl 'http://localhost:8983/api/cores/dblp/config/requestHandler?componentName=/browse&expandParams=true'
+you can also define own sets and use them with useParams: http://lucene.apache.org/solr/guide/7_4/request-parameters-api.html
+also see http://lucene.apache.org/solr/guide/7_4/implicit-requesthandlers.html#implicit-requesthandlers
+  -->
+  <requestHandler name="/browse" class="solr.SearchHandler" useParams="query,facets,velocity,browse">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="facet">on</str>
+      <str name="facet.field">year</str>
+      <str name="facet.field">journal</str>
+      <str name="facet.field">author</str>
+    </lst>
+  </requestHandler>
+
+  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
+    <lst name="defaults">
+      <str name="df">_text_</str>
+    </lst>
+  </initParams>
+
+  <!-- Solr Cell Update Request Handler
+
+http://wiki.apache.org/solr/ExtractingRequestHandler
+
+  -->
+  <requestHandler name="/update/extract"
+                  startup="lazy"
+                  class="solr.extraction.ExtractingRequestHandler" >
+    <lst name="defaults">
+      <str name="lowernames">true</str>
+      <str name="fmap.meta">ignored_</str>
+      <str name="fmap.content">_text_</str>
+    </lst>
+  </requestHandler>
+
+  <searchComponent name="authorsuggest" class="solr.SuggestComponent">
+    <lst name="suggester">
+      <str name="name">default</str>
+      <str name="lookupImpl">AnalyzingInfixLookupFactory</str>
+      <str name="dictionaryImpl">DocumentDictionaryFactory</str>
+      <str name="field">authors.name</str>
+      <!--<str name="weightField">price</str>-->
+      <str name="suggestAnalyzerFieldType">string</str>
+      <str name="buildOnStartup">false</str>
+    </lst>
+  </searchComponent>
+
+  <requestHandler name="/authors" class="solr.SearchHandler"
+                  startup="lazy" >
+    <lst name="defaults">
+      <str name="suggest">true</str>
+      <str name="suggest.count">10</str>
+    </lst>
+    <arr name="components">
+      <str>authorsuggest</str>
+    </arr>
+  </requestHandler>
+  <!-- Search Components see backup file for configuration of searchcomponent/requesthandler combinations -->
+  <!-- same for updaterequest processor chains -->
+
+  <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
+    <str name="template.base.dir">${velocity.template.base.dir:}</str>
+    <str name="solr.resource.loader.enabled">${velocity.solr.resource.loader.enabled:true}</str>
+    <str name="params.resource.loader.enabled">${velocity.params.resource.loader.enabled:false}</str>
+  </queryResponseWriter>
+
+  <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
+    <int name="xsltCacheLifetimeSeconds">5</int>
+  </queryResponseWriter>
+
+
+<!-- Function Parsers
+http://wiki.apache.org/solr/FunctionQuery
+https://lucene.apache.org/solr/guide/7_4/function-queries.html
+-->
+  <!-- example of registering a custom function parser  -->
+  <!--
+     <valueSourceParser name="myfunc"
+                        class="com.mycompany.MyValueSourceParser" />
+    -->
+
+
+  <!-- Document Transformers https://lucene.apache.org/solr/guide/7_4/transforming-result-documents.html -->
+  <requestHandler class="solr.SearchHandler" name="/suggest" useParams="suggest">
+    <lst name="defaults">
+      <str name="fl">suggest</str>
+      <str name="qf">suggest_lower^10 suggest_ngram</str>
+    </lst>
+  </requestHandler>
+
+
+
+</config>
