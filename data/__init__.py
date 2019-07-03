@@ -1,12 +1,10 @@
 import gzip
 import json
 from json.decoder import JSONDecodeError
-from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import itertools
 from typing import Callable
-
-DATA_HOME = Path('/storage') / 'thesis' / 'data'
+from data_config import DATA_HOME
 
 
 def batch_jsonl_parsed(generator, batchsize, parser_fn: Callable[[str], str]):
@@ -83,5 +81,3 @@ def parse_jsonl_parallel(generator, processes=4):
 def upload_parallel(generator, session, collection):
     with Pool(processes=cpu_count()*2) as pool:
         yield from pool.imap(session.collection(collection).update.jsonl, generator)
-
-
