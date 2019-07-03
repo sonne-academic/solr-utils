@@ -3,3 +3,4 @@ lxml
 zstandard
 sshtunnel
 aiohttp
+progress
