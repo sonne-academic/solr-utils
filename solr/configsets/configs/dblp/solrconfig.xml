@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-  <luceneMatchVersion>7.7.0</luceneMatchVersion>
+  <luceneMatchVersion>8.1.0</luceneMatchVersion>
 
   <updateHandler>
     <updateLog>
@@ -14,20 +14,25 @@
 
   <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
     <arr name="format">
-      <str>yyyy-MM-dd</str>
-      <str>yyyy</str>
+      <str>uuuu-MM-dd</str>
+<!--      <str>uuuu</str>-->
     </arr>
   </updateProcessor>
 
   <updateRequestProcessorChain name="defaultWithParseDate" default="true" processor="parse-date">
     <!-- needed for title, since it contains HTML markup -->
+    <!--TODO can possible abuse this to keep HTML around, i.e. copy to something
+        of type textfield (cannot be solr.StrField) -->
     <processor name="strip-html" class="solr.HTMLStripFieldUpdateProcessorFactory">
       <str name="typeClass">solr.StrField</str>
     </processor>
-    <!-- when this is executed before HTML stripping, the HTMLMarkup is preserved -->
-    <!--TODO can possible abuse this to keep HTML around, i.e. copy to something
-        of type textfield (cannot be solr.StrField) -->
+    <!--
+    the suggest field is used for default queries. i.e. when no field name is given to the edismax parser
+    hence, this processor puts title author and year into the suggest field
+    if you'd want to include more information (ex. journal) you should add that here
+    -->
     <processor class="solr.CloneFieldUpdateProcessorFactory" name="clone-suggest">
+      <!-- when this is executed before HTML stripping, the HTMLMarkup is preserved -->
       <arr name="source">
         <str>title</str>
         <str>year</str>
@@ -35,27 +40,15 @@
       </arr>
       <str name="dest">suggest</str>
     </processor>
+    <!--
+      By default, this processor concatenates the values for any
+      field name which according to the schema is multiValued="false"
+      and uses TextField or StrField
+    -->
     <processor class="solr.ConcatFieldUpdateProcessorFactory">
-      <str name="delimiter"> ; </str>
-      <lst name="exclude">
-        <str name="fieldName">url</str>
-        <str name="fieldName">pub_type_str</str>
-        <str name="fieldName">publtype</str>
-        <str name="fieldName">address</str>
-        <str name="fieldName">booktitle</str>
-        <str name="fieldName">chapter</str>
-        <str name="fieldName">journal</str>
-        <str name="fieldName">month</str>
-        <str name="fieldName">number</str>
-        <str name="fieldName">title</str>
-        <str name="fieldName">year</str>
-        <str name="fieldName">mdate</str>
-        <str name="fieldName">cdate</str>
-      </lst>
+      <str name="delimiter">; </str>
+      <str name="fieldName">suggest</str>
     </processor>
-    <!--<processor class="solr.FirstFieldValueUpdateProcessorFactory">-->
-      <!--<str name="fieldName">primary_author</str>-->
-    <!--</processor>-->
     <processor class="solr.LogUpdateProcessorFactory"/>
     <processor class="solr.DistributedUpdateProcessorFactory"/>
     <processor class="solr.RunUpdateProcessorFactory"/>
@@ -102,23 +95,4 @@
       <str name="indent">true</str>
     </lst>
   </requestHandler>
-
-
-  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell">
-    <lst name="defaults">
-      <str name="df">_text_</str>
-    </lst>
-  </initParams>
-
-  <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
-    <int name="xsltCacheLifetimeSeconds">5</int>
-  </queryResponseWriter>
-
-  <requestHandler class="solr.SearchHandler" name="/suggest" useParams="suggest">
-    <lst name="defaults">
-      <str name="fl">suggest</str>
-      <str name="qf">suggest_lower^10 suggest_ngram</str>
-    </lst>
-  </requestHandler>
-
 </config>

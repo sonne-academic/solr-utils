@@ -1,46 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema name="default-config" version="1.6">
-  <fieldType name="pint" class="solr.IntPointField" docValues="true"/>
-  <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
-  <fieldType name="pdate" class="solr.DatePointField" docValues="true" stored="true"/>
-  <fieldType name="string" class="solr.StrField" docValues="true" sortMissingLast="true"/>
-  <fieldType name="strings" class="solr.StrField" docValues="true" multiValued="true" sortMissingLast="true"/>
-  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true"/>
+  <fieldType name="pint" class="solr.IntPointField" uninvertible="false" docValues="true"/>
+  <fieldType name="plong" class="solr.LongPointField" uninvertible="false" docValues="true"/>
+  <fieldType name="pdate" class="solr.DatePointField" uninvertible="false" docValues="true" stored="true"/>
+  <fieldType name="string" class="solr.StrField" uninvertible="false" docValues="true" sortMissingLast="true"/>
+  <fieldType name="strings" class="solr.StrField" uninvertible="false" docValues="true" multiValued="true" sortMissingLast="true"/>
+  <fieldType name="text_general" class="solr.TextField" uninvertible="false" positionIncrementGap="100" multiValued="true"/>
+  <fieldType name="important_strings" class="solr.StrField" uninvertible="false" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="important_string" class="solr.StrField" uninvertible="false" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
+<!--  <fieldType name="pub_type" class="solr.EnumFieldType" uninvertible="false" docValues="true" enumsConfig="enumsConfig.xml" enumName="ptype"/>-->
 
-  <fieldType name="important_strings" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
-  <fieldType name="important_string" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
-  <fieldType name="pub_type" class="solr.EnumFieldType" docValues="true" enumsConfig="enumsConfig.xml" enumName="ptype"/>
-  <fieldType name="ancestor_path" class="solr.TextField">
-    <analyzer type="index"><tokenizer class="solr.KeywordTokenizerFactory"/></analyzer>
-    <analyzer type="query"><tokenizer class="solr.PathHierarchyTokenizerFactory" delimiter="/"/></analyzer>
+  <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
+  <!-- these fields (types) are used by the /suggest/* request handlers -->
+  <!--if stored="false", highlighting will no longer work!-->
+  <fieldType name="text_lower" class="solr.TextField" uninvertible="false" multiValued="false" positionIncrementGap="100">
+    <analyzer>
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
   </fieldType>
-  <fieldType name="descendent_path" class="solr.TextField">
-    <analyzer type="index"><tokenizer class="solr.PathHierarchyTokenizerFactory" delimiter="/"/></analyzer>
-    <analyzer type="query"><tokenizer class="solr.KeywordTokenizerFactory"/></analyzer>
+  <fieldType name="text_prefix" class="solr.TextField" uninvertible="false" multiValued="false" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+      <filter class="solr.EdgeNGramFilterFactory" minGramSize="2" maxGramSize="15"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
   </fieldType>
 
   <uniqueKey>id</uniqueKey>
+  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
 
-  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <!--<field name="id_ancestor" type="ancestor_path" multiValued="false" indexed="true" stored="true"/>-->
-  <!--<field name="id_descendent" type="descendent_path" multiValued="false" indexed="true" stored="true"/>-->
-  <!--<copyField source="id" dest="id_ancestor" maxChars="256"/>-->
-  <!--<copyField source="id" dest="id_descendent" maxChars="256"/>-->
-
-  <!--<fieldType name="html_title" class="solr.TextField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false">-->
-    <!--<analyzer>-->
-      <!--<charFilter class="solr.HTMLStripCharFilterFactory"/>-->
-      <!--<tokenizer class="solr.WhitespaceTokenizerFactory" rule="java" />-->
-    <!--</analyzer>-->
-  <!--</fieldType>-->
-
-  <!--<field name="pub_type" type="pub_type"/>-->
-  <!--<copyField source="pub_type" dest="pub_type_str" maxChars="256"/>-->
-
+  <!-- single value fields -->
   <field name="doc_type"      type="important_string"/>
   <field name="publtype"      type="important_string"/>
   <field name="address"       type="important_string"/>
@@ -52,6 +50,7 @@
   <field name="title"         type="important_string"/>
   <field name="doi"           type="important_string"/>
 
+  <!-- multi value fields -->
   <field name="author"    type="important_strings"/>
   <field name="cdrom"     type="important_strings"/>
   <field name="cite"      type="important_strings"/>
@@ -68,38 +67,19 @@
   <field name="url"       type="important_strings"/>
   <field name="volume"    type="important_strings"/>
 
+  <!-- intergers -->
   <field name="year"          type="pint"/>
   <field name="author_count"  type="pint"/>
 
+  <!-- dates -->
   <field name="mdate" type="pdate"/>
   <field name="cdate" type="pdate"/>
 
-  <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
   <field name="suggest" type="suggest_type"/>
-
-  <!-- these fields (types) are used by the /suggest/* request handlers -->
-  <!--if stored="false", highlighting will no longer work!-->
-  <fieldType name="text_lower" class="solr.TextField" multiValued="false" positionIncrementGap="100">
-    <analyzer>
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-    </analyzer>
-  </fieldType>
   <field name="suggest_lower"   type="text_lower"/>
-  <copyField source="suggest"    dest="suggest_lower"/>
-
-  <fieldType name="text_prefix" class="solr.TextField" multiValued="false" positionIncrementGap="100">
-    <analyzer type="index">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <filter class="solr.EdgeNGramFilterFactory" minGramSize="2" maxGramSize="15"/>
-    </analyzer>
-    <analyzer type="query">
-      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-    </analyzer>
-  </fieldType>
   <field name="suggest_ngram"   type="text_prefix"/>
+
+  <copyField source="suggest"    dest="suggest_lower"/>
   <copyField source="suggest"    dest="suggest_ngram"/>
 
 </schema>
