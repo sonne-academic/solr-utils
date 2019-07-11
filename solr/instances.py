@@ -13,6 +13,18 @@ class LocalhostConnector(SolrConnector):
         pass
 
 
+class HostConnector(SolrConnector):
+    def __init__(self, host: str, port: int):
+        self.port = port
+        self.host = host
+
+    def connect(self) -> str:
+        return f'http://{self.host}:{self.port}/solr/'
+
+    def close(self):
+        pass
+
+
 class SolrJumpHostConnector(SolrConnector):
     def __init__(self, jump_host, private_host, user, ssh_port=22, solr_port=8983, local_port=0):
         self.tunnel = SSHTunnelForwarder(
@@ -41,6 +53,10 @@ def get_develop_session():
 
 def get_localhost_session(port=8983):
     return SolrSession(LocalhostConnector(port))
+
+
+def get_session(host='solr0', port=8983):
+    return SolrSession(HostConnector(host, port))
 
 
 def get_async_localhost_session(port=8983):

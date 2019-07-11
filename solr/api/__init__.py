@@ -6,9 +6,11 @@ class SolrPathApi:
         self.path = path
 
     def _post(self, **kwargs) -> Response:
-        return self.session._post_path(self.path, **kwargs)
+        response = self.session._post_path(self.path, **kwargs)
+        return response
 
     def _get(self, **kwargs) -> Response:
-        return self.session._get_path(self.path, **kwargs)
+        response = self.session._get_path(self.path, **kwargs)
+        return response
 
 

@@ -3,6 +3,7 @@ from pathlib import Path
 import io
 import zipfile
 
+
 __all__ = ['SolrAdmin']
 
 
@@ -56,7 +57,7 @@ class Configs(SolrPathApi):
 
     def create(self, name: str, baseConfigSet: str, configSetProps: dict = None):
         params = {
-            'action': 'DELETE',
+            'action': 'CREATE',
             'name': name,
             'baseConfigSet': baseConfigSet
         }
@@ -67,12 +68,12 @@ class Configs(SolrPathApi):
 
         return self._get(params=params)
 
-    def upload(self, name, configPath):
+    def upload(self, name, configPath: Path):
         params = {'action': 'UPLOAD', 'name': name}
         headers = {'Content-Type': 'application/octet-stream'}
-        zipcontent = build_config_zip(Path(configPath))
+        zipcontent = build_config_zip(configPath)
 
-        return self.session._post_path('admin/configs', headers=headers, params=params, data=zipcontent.getbuffer())
+        return self._post(headers=headers, params=params, data=zipcontent.getbuffer())
 
 
 class Collections(SolrPathApi):
@@ -132,7 +133,37 @@ class Collections(SolrPathApi):
         params = {
             'action': 'LIST'
         }
+        # response = self._get(params=params)
+        # data = response.json()
+        # return data['collections']
         return self._get(params=params)
 
+    def createalias(self, alias_name, collections: list):
+        params = {
+            'action': 'CREATEALIAS',
+            'name': alias_name,
+            'collections': ','.join(collections)
+        }
+        return self._get(params=params)
+
+    def deletealias(self, alias_name):
+        params = {
+            'action': 'DELETEALIAS',
+            'name': alias_name,
+        }
+        return self._get(params=params)
+
+    def listaliases(self):
+        params = {
+            'action': 'LISTALIASES'
+        }
+        return self._get(params=params)
+
+    def aliasprop(self, alias_name, props):
+        params = {
+            'action': 'ALIASPROP',
+            'name': alias_name,
+        }
+        return self._get(params=params)
 
 

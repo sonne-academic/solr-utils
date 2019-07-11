@@ -58,13 +58,14 @@ class SolrGet(SolrPathApi):
         params = {
             'id': _id
         }
-        return  self._get(params=params)
+        return self._get(params=params)
 
     def ids(self, _ids):
         params = {
             'ids': _ids
         }
-        return  self._post(json={'params':params})
+        return self._post(json={'params':params})
+
 
 class SolrGraph(SolrPathApi):
     def __init__(self, session, collection_name):
