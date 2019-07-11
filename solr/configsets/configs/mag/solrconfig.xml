@@ -32,7 +32,6 @@
   <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
     <arr name="format">
       <str>yyyy-MM-dd</str>
-      <str>yyyy</str>
     </arr>
   </updateProcessor>
   <updateRequestProcessorChain name="defaultWithParseDate" default="true" processor="parse-date">

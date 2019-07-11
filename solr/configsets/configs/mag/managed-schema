@@ -27,9 +27,9 @@
   <field name="year"                 type="pint"/>
   <field name="date"                 type="important_string"/>
   <field name="publisher"            type="important_string"/>
-  <field name="journalid"            type="plong"/>
-  <field name="conferenceseriesid"   type="plong"/>
-  <field name="conferenceinstanceid" type="plong"/>
+<!--  <field name="journalid"            type="plong"/>-->
+<!--  <field name="conferenceseriesid"   type="plong"/>-->
+<!--  <field name="conferenceinstanceid" type="plong"/>-->
   <field name="volume"               type="important_string"/>
   <field name="issue"                type="important_string"/>
   <field name="firstpage"            type="important_string"/>
@@ -43,8 +43,11 @@
   <field name="conferenceinstance"   type="important_string"/>
   <field name="conferenceseries" type="important_string"/>
   <field name="author" type="important_strings"/>
+  <field name="affiliations" type="important_strings"/>
   <field name="author_count" type="pint"/>
   <field name="references" type="important_strings"/>
+  <field name="cited_by" type="important_strings"/>
+  <field name="urls" type="important_strings"/>
   <field name="journal" type="important_string"/>
 
   <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
@@ -70,7 +73,7 @@
       <filter class="solr.LowerCaseFilterFactory"/>
     </analyzer>
   </fieldType>
-  <field name="suggest_ngram"   type="text_ngram"/>
+  <field name="suggest_ngram"   type="text_prefix"/>
   <copyField source="suggest"    dest="suggest_ngram"/>
 
 </schema>

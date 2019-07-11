@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-  <luceneMatchVersion>7.7.0</luceneMatchVersion>
+  <luceneMatchVersion>8.1.0</luceneMatchVersion>
 
   <updateHandler>
     <updateLog>
@@ -15,7 +15,6 @@
   <updateProcessor class="solr.ParseDateFieldUpdateProcessorFactory" name="parse-date">
     <arr name="format">
       <str>yyyy-MM-dd</str>
-      <str>yyyy</str>
     </arr>
   </updateProcessor>
 
@@ -67,32 +66,5 @@
     </lst>
   </requestHandler>
 
-  <lib dir="${solr.install.dir:}/dist/" regex="solr-velocity-\d.*\.jar"/>
-  <lib dir="${solr.install.dir:}/contrib/velocity/lib" regex=".*\.jar"/>
-  <requestHandler name="/browse" class="solr.SearchHandler" useParams="query,facets,velocity,browse">
-    <lst name="defaults">
-      <str name="echoParams">explicit</str>
-      <str name="facet">on</str>
-      <str name="facet.field">year</str>
-      <str name="facet.field">journal</str>
-      <str name="facet.field">author</str>
-    </lst>
-  </requestHandler>
-
-  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
-    <lst name="defaults">
-      <str name="df">_text_</str>
-    </lst>
-  </initParams>
-
-  <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
-    <str name="template.base.dir">${velocity.template.base.dir:}</str>
-    <str name="solr.resource.loader.enabled">${velocity.solr.resource.loader.enabled:true}</str>
-    <str name="params.resource.loader.enabled">${velocity.params.resource.loader.enabled:false}</str>
-  </queryResponseWriter>
-
-  <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
-    <int name="xsltCacheLifetimeSeconds">5</int>
-  </queryResponseWriter>
 
 </config>
