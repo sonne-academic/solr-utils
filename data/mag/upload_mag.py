@@ -1,6 +1,7 @@
 from data.mag import generate_denormailzed_papers
 from solr.instances import get_localhost_session
 from data import batch_jsonl_parsed, upload_parallel
+from solr.configsets import get_config
 import json
 
 def rename(dic, old, new):

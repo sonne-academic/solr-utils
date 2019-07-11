@@ -1,12 +1,12 @@
-from data import DATA_HOME, read_gzip_lines
+from data import read_gzip_lines
+from data_config import S2_DATA
 
 _ENCODING = 'utf-8'
-DATA_FOLDER = DATA_HOME / 's2nex'
 
 
 def file_list():
     for i in range(47):
-        yield DATA_FOLDER / f's2-corpus-{i:02d}.gz'
+        yield S2_DATA / f's2-corpus-{i:02d}.gz'
 
 
 def read_all():

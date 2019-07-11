@@ -1,7 +1,5 @@
-from data import DATA_HOME
-
-DATA_FOLDER = DATA_HOME / 'dblp'
+from data_config import DBLP_DATA
 
 
 def file_list():
-    yield DATA_FOLDER / 'dblp-2019-04-01.xml.gz'
+    yield DBLP_DATA / 'dblp-2019-07-01.xml.gz'

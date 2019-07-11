@@ -3,6 +3,8 @@ from solr.instances import get_localhost_session
 from data import upload_batches_unparsed
 
 COLLECTION = 'mag_conf_series'
+
+
 def reset_collection(s):
     print('deleting collection')
     print(s.admin.collections.delete(COLLECTION).json())

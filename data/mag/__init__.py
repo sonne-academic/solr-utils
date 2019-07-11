@@ -1,11 +1,12 @@
-from data import DATA_HOME, read_gzip_lines
+from data import DATA_HOME, read_gzip_lines, ItemsPerSecondBar
 import json
-
+import sqlite3
 from data.mag.data_classes.paper_author_affiliations import PaperAuthorAffiliation
 from data.mag.headers import Authors, Papers, Journals, ConferenceInstances, ConferenceSeries, PaperAuthorAffiliations
 
 _ENCODING = 'utf-8'
 DATA_FOLDER = DATA_HOME / 'mag'
+conn = sqlite3.connect(DATA_FOLDER/'mag.sqlite3', check_same_thread=False)
 
 AUTHORS_FILE = DATA_FOLDER / f'Authors.txt.gz'
 PAPERS_FILE = DATA_FOLDER / f'Papers.txt.gz'
@@ -22,6 +23,7 @@ CONF_INST_UPDATE_FILE = DATA_FOLDER / f'conference_instance_updates.jsonl.gz'
 CONF_SER_UPDATE_FILE = DATA_FOLDER / f'conference_series_updates.jsonl.gz'
 
 DENORM_PAPER_FILE = DATA_FOLDER / f'papers_denormailzed.jsonl.gz'
+
 
 def discard_empty(thing: dict):
     empty = []
@@ -40,10 +42,11 @@ def generate_json_dict(headers, generator):
 
         yield thing
 
+
 def generate_json_string(headers, generator):
     for thing in generate_json_dict(headers, generator):
         discard_empty(thing)
-        s=json.dumps(thing)
+        s = json.dumps(thing)
         yield s
 
 

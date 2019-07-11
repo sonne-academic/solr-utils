@@ -1,24 +1,23 @@
-from data.dblp.convert_to_jsonl import yield_from_gzip
-from solr.instances import get_localhost_session
+from solr.instances import get_session
 from multiprocessing import Pool, cpu_count
 import itertools
 import json
 from datetime import datetime
-from data import batch_jsonl_parsed
-from urllib.parse import urlparse
-from code import interact
+from data import batch_jsonl_parsed, do_parallel
 import re
-
-def rename(dic, old, new):
-    try:
-        dic[new] = dic.pop(old)
-    except KeyError:
-        pass
+from data.dblp.stream_update import generate_events
+from data.dblp.convert_to_jsonl import build_upload_document, yield_from_gzip
+from pprint import pprint
+from solr_config import COLLECTION_DEFAULTS
+from solr.configsets import get_config
 
 new_names = {
     'pub_type': 'doc_type',
 }
 count_fields = ['author']
+convert_to_list = ['author', 'ee']
+doi_re = re.compile(r'.*/(10.[0-9]+(\.[0-9]+)?/.*)')
+
 
 def as_list(parsed, name):
     if name not in parsed:
@@ -28,9 +27,13 @@ def as_list(parsed, name):
     l = parsed.pop(name)
     parsed[name] = [l]
 
-convert_to_list = ['author','ee']
 
-doi_re = re.compile(r'.*/(10.[0-9]+(\.[0-9]+)?/.*)')
+def rename(dic, old, new):
+    try:
+        dic[new] = dic.pop(old)
+    except KeyError:
+        pass
+
 
 def find_doi(inp):
     for url in inp:
@@ -44,24 +47,26 @@ def find_doi(inp):
             return groups[0]
     return None
 
+
 def parse_json(line):
     try:
         parsed = json.loads(line)
     except json.decoder.JSONDecodeError as e:
         raise Exception(f'line: {line}')
+    # parsed = line
     # dblp-2019-02-01.xml.gz contains one set with a duplicate year field
     # this will replace the list with the first value
     try:
-        if list is type(parsed['year']):
+        if isinstance(parsed['year'], list):
             parsed['year'] = parsed['year'][0]
     except KeyError:
         pass
     for old, new in new_names.items():
-        rename(parsed,old,new)
-    for field in count_fields:
-        parsed[f'{field}_count'] = len(parsed.get(field, []))
+        rename(parsed, old, new)
     for field in convert_to_list:
         as_list(parsed, field)
+    for field in count_fields:
+        parsed[f'{field}_count'] = len(parsed.get(field, []))
     doi = find_doi(parsed.get('ee', []))
     if doi is not None:
         parsed['doi'] = doi
@@ -102,9 +107,9 @@ def batch_jsonl(generator, batchsize):
                 break
 
 
-def upload_parallel(generator, session):
+def upload_parallel(generator, collection):
     with Pool(processes=cpu_count()) as pool:
-        yield from pool.imap(session.collection('dblp').update.jsonl, generator)
+        yield from pool.imap(collection.update.jsonl, generator)
 
 
 def maybe_add_field(c, name: str, typ: str):
@@ -115,32 +120,69 @@ def maybe_add_field(c, name: str, typ: str):
     else:
         print(f'field {name} exists, skipping')
 
-if __name__ == '__main__':
-    collection = 'dblp'
+
+def main():
+    alias = 'dblp'
     config_local = 'dblp'
     config_online = 'dblp'
-    s = get_localhost_session()
-    RESET = False
-    if RESET:
-        print('deleting collection')
-        """ {
-          'responseHeader': {'status': 0, 'QTime': 201}, 
-          'success': {
-            'solr2:8983_solr': {'responseHeader': {'status': 0, 'QTime': 19}}, 
-            'solr0:8983_solr': {'responseHeader': {'status': 0, 'QTime': 20}}, 
-            'solr1:8983_solr': {'responseHeader': {'status': 0, 'QTime': 20}}
-          }
-        } """
-        print(s.admin.collections.delete('dblp').json())
+    version = '2019-07-01'
+    collection_name = '.'.join([alias, version])
+    s = get_session('localhost', port=8984)
+    collections = s.admin.collections.list().json()['collections']
+    create = False
+    if collection_name in collections:
+        decide = input(f'collection {collection_name} exists, reset? [Y/n]')
+        if decide in ['y', '']:
+            create = True
+            print('deleting collection')
+            """ {
+              'responseHeader': {'status': 0, 'QTime': 201}, 
+              'success': {
+                'solr2:8983_solr': {'responseHeader': {'status': 0, 'QTime': 19}}, 
+                'solr0:8983_solr': {'responseHeader': {'status': 0, 'QTime': 20}}, 
+                'solr1:8983_solr': {'responseHeader': {'status': 0, 'QTime': 20}}
+              }
+            } 
 
-        print('deleting config')
-        # {'responseHeader': {'status': 0, 'QTime': 99}}
-        print(s.admin.configs.delete('dblp').json())
+            error = {
+                'responseHeader': {'QTime': 20, 'status': 400},
+                'Operation delete caused exception:': 'org.apache.solr.common.SolrException:org.apache.solr.common.SolrException: Could not find collection : dblp',
+                'error': {
+                    'code': 400,
+                    'metadata': [
+                        'error-class',
+                        'org.apache.solr.common.SolrException',
+                        'root-error-class',
+                        'org.apache.solr.common.SolrException'
+                    ],
+                    'msg': 'Could not find collection : dblp'
+                },
+                'exception': {
+                    'msg': 'Could not find collection : dblp',
+                    'rspCode': 400
+                },
+            }
+            """
+            pprint(s.admin.collections.delete(collection_name).json())
+    else:
+        create = True
 
+    create_cfg = False
+    pprint(s.admin.configs.list().json())
+    configsets = s.admin.configs.list().json()['configSets']
+    if config_online in configsets:
+        decide = input(f'config {config_online} exists, replace? [Y/n]')
+        if decide in ['y', '']:
+            print('deleting config')
+            # {'responseHeader': {'status': 0, 'QTime': 99}}
+            print(s.admin.configs.delete(config_online).json())
+    else:
+        create_cfg = True
+    if create_cfg:
         print('sending latest config')
         # {'responseHeader': {'status': 0, 'QTime': 148}}
-        print(s.admin.configs.upload('dblp','/home/bone/solr/solr/configsets/configs/dblp').json())
-
+        print(s.admin.configs.upload(config_online, get_config(config_local)).json())
+    if create:
         print('creating collection')
         """ {
           'responseHeader': {'status': 0, 'QTime': 1888}, 
@@ -159,30 +201,45 @@ if __name__ == '__main__':
           }
         }
         """
-        print(s.admin.collections.create('dblp',4,1,1,'dblp').json())
+        create_params = COLLECTION_DEFAULTS.copy()
+        create_params.update({
+            'name': collection_name,
+            'config_name': config_online,
+        })
+        pprint(s.admin.collections.create(**create_params).json())
 
     print('sending documents')
-    c = s.collection('dblp')
+    c = s.collection(collection_name)
     maybe_add_field(c, 'doi', 'important_string')
     maybe_add_field(c, 'note', 'important_strings')
     maybe_add_field(c, 'author_count', 'pint')
 
     counter = 0
     batch_size = 10_000
+    # batch_generator = batch_jsonl_parsed(build_upload_document(generate_events()), batch_size, parse_json)
     batch_generator = batch_jsonl_parsed(yield_from_gzip(), batch_size, parse_json)
-    for response in upload_parallel(batch_generator, s):  # 3922 batches with 10_000 size
+    for response in upload_parallel(batch_generator, c):  # 3922 batches with 10_000 size
         counter += 1
         # {'responseHeader': {'rf': 1, 'status': 0, 'QTime': 2499}}
         d = response.json()
         if d['responseHeader']['status'] != 0:
             print(f'{d}')
-        print(f'{counter:4d}', end=' ')
-        if counter % 10 == 0:
-            print()
+        # print(f'{counter:4d}', end=' ')
+        # if counter % 10 == 0:
+        #     print()
 
     # r = s.collection(collection).update.jsonl(yield_from_gzip())
     # print(r.text)
 
-    print('sending commit')
-    r = s.collection(collection).update.xml('<commit/>')
-    print(r.text)
+    # print('sending commit')
+    # r = s.collection(collection_name).update.xml('<commit/>')
+    # print(r.text)
+    print('setting alias')
+    pprint(s.admin.collections.createalias(alias, [collection_name]).json())
+
+
+if __name__ == '__main__':
+    start = datetime.now()
+    main()
+    end = datetime.now()
+    print(f'took {end - start}')
