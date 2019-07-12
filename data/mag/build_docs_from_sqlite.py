@@ -106,7 +106,7 @@ def generate_assembled_papers(max_num=100):
     c = conn.cursor()
     for paper in generate_papers(max_num):
         paperid = paper['id']
-        paper['author'], paper['affiliations'] = generate_author_affiliations(paperid)
+        paper['author'], paper['affiliation'] = generate_author_affiliations(paperid)
         paper['urls'] = list(generate_urls(paperid))
         paper['cited_by'] = list(generate_cited_by(paperid))
         paper['cited_by_count'] = len(paper['cited_by'])
