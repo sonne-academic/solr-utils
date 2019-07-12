@@ -2,7 +2,6 @@ import sqlite3
 import json
 from datetime import datetime
 import gzip
-import progress.bar
 from data import DATA_HOME, ItemsPerSecondBar
 
 DATA_FOLDER = DATA_HOME / 'mag'
@@ -36,103 +35,120 @@ def strip_and_dump_from_gen(generator):
         yield json.dumps(data, ensure_ascii=False)
 
 
-def generate_papers(max_num=100):
+def row_count(table_name):
+    return conn.execute(f'SELECT Count(*) FROM {table_name}').fetchone()[0]
+
+
+def generate_papers():
     c = row_conn.cursor()
+    # row_count = c.execute('SELECT Count(*) FROM Papers').fetchone()[0]
     fields = ', '.join(paper_field_names)
     new_names = list(paper_field_names.values())
-    ctr = 0
-    ips = ItemsPerSecondBar('Merging', max=max_num)
+    ips = ItemsPerSecondBar('papers', max=row_count('Papers'))
     for paper in c.execute(f'select {fields} from Papers'):
-        if ctr > max_num:
-            break
-        ctr += 1
         yield dict(zip(new_names, paper))
         ips.next()
     ips.finish()
 
 
-def generate_author_affiliations(paperid):
-    outer_c = conn.cursor()
-    # inner_c = row_conn.cursor()
+def generate_author_affiliation_updates():
+    c = conn.cursor()
     authors = []
     affiliations = []
-    for author, affiliation in outer_c.execute(
-            'select OriginalAuthor, OriginalAffiliation from PaperAuthorAffiliations where PaperId=? '
-            'order by PaperAuthorAffiliations.AuthorSequenceNumber', (paperid,)):
+    query = 'select PaperId, OriginalAuthor, OriginalAffiliation ' \
+            'from PaperAuthorAffiliations order by PaperId, AuthorSequenceNumber'
+    prev_pid = None
+    ips = ItemsPerSecondBar('author/affiliations', max=row_count('PaperAuthorAffiliations'))
+    for paperid, author, affiliation in c.execute(query):
+        if prev_pid is None:
+            prev_pid = paperid
+        elif prev_pid != paperid:
+            yield {'id': prev_pid, 'author': {'set': authors}, 'affiliation': {'set': affiliations}}
+            authors = []
+            affiliations = []
+            prev_pid = paperid
         authors.append(author)
         affiliations.append(affiliation)
-    return authors, affiliations
-    # for aa in outer_c.execute(
-    #         'select * from PaperAuthorAffiliations '
-    #         'where PaperId=? '
-    #         'order by PaperAuthorAffiliations.AuthorSequenceNumber', (paperid,)):
-    #     aa = dict(aa)
-    #     if type(aa['AffiliationId']) is int:
-    #         affiliation = inner_c.execute(
-    #             'select * from Affiliations where AffiliationId=?',
-    #             (aa['AffiliationId'],)).fetchone()
-    #         aa['Affiliation'] = dict(affiliation)
-    #     else:
-    #         aa.pop('AffiliationId')
-    #     aa['Author'] = dict(inner_c.execute('select * from Authors where AuthorId=?', (aa['AuthorId'],)).fetchone())
-    #     yield aa
+        ips.next()
+    ips.finish()
 
 
-def generate_urls(paperid):
+def generate_journal_updates():
     c = conn.cursor()
-    for url in c.execute('select SourceUrl from PaperUrls where PaperId=?', (paperid,)):
-        yield url[0]
+    query = 'select PaperId, J.DisplayName from Papers P inner join Journals J on P.JournalId = J.JournalId'
+    ips = ItemsPerSecondBar('journals')
+    for paperid, journal in c.execute(query):
+        yield {'id': paperid, 'journal': {'set': journal}}
+        ips.next()
+    ips.finish()
 
 
-def generate_references(paperid):
+def generate_url_updates():
     c = conn.cursor()
-    for ref in c.execute('select PaperReferenceId from PaperReferences where PaperId=?', (paperid,)):
-        yield ref[0]
+    query = 'select PaperId, SourceUrl from PaperUrls order by PaperId'
+    prev_pid = None
+    urls = []
+    ips = ItemsPerSecondBar('urls', max=row_count('PaperUrls'))
+    for paperid, url in c.execute(query):
+        if prev_pid is None:
+            prev_pid = paperid
+        elif prev_pid != paperid:
+            yield {'id': prev_pid, 'urls': {'set': urls}}
+            urls = []
+            prev_pid = paperid
+        urls.append(url)
+        ips.next()
+    ips.finish()
 
 
-def generate_cited_by(paperid):
+def generate_references_updates():
     c = conn.cursor()
-    for citation in c.execute('select PaperId from PaperReferences where PaperReferenceId=?', (paperid,)):
-        yield citation[0]
+    query = 'select PaperId, PaperReferenceId from PaperReferences order by PaperId'
+    prev_pid = None
+    refs = []
+    ips = ItemsPerSecondBar('references', max=row_count('PaperReferences'))
+    for paperid, ref in c.execute(query):
+        if prev_pid is None:
+            prev_pid = paperid
+        elif prev_pid != paperid:
+            yield {'id': prev_pid, 'references': {'set': refs}, 'references_count': {'set': len(refs)}}
+            refs = []
+            prev_pid = paperid
+        refs.append(ref)
+        ips.next()
+    ips.finish()
 
+
+def generate_cited_by_updates():
+    c = conn.cursor()
+    query = 'select PaperReferenceId, PaperId from PaperReferences order by PaperReferenceId'
+    cites = []
+    prev_pid = None
+    ips = ItemsPerSecondBar('citations', max=row_count('PaperReferences'))
+    for paperid, citation in c.execute(query):
+        if prev_pid is None:
+            prev_pid = paperid
+        elif prev_pid != paperid:
+            yield {'id': paperid, 'cited_by': {'set': cites}, 'cited_by_count': {'set': len(cites)}}
+            cites = []
+            prev_pid = paperid
+        cites.append(citation)
+        ips.next()
+    ips.finish()
+
+
+UPDATE_GENERATORS = [
+    generate_author_affiliation_updates,
+    generate_cited_by_updates,
+    generate_journal_updates,
+    generate_references_updates,
+    generate_url_updates,
+]
 
 def generate_resources(paperid):
     c = row_conn.cursor()
     for res in c.execute('select * from PaperResources where PaperId=?', (paperid,)):
         yield dict(res)
-
-
-def generate_assembled_papers(max_num=100):
-    c = conn.cursor()
-    for paper in generate_papers(max_num):
-        paperid = paper['id']
-        paper['author'], paper['affiliation'] = generate_author_affiliations(paperid)
-        paper['urls'] = list(generate_urls(paperid))
-        paper['cited_by'] = list(generate_cited_by(paperid))
-        paper['cited_by_count'] = len(paper['cited_by'])
-        paper['references'] = list(generate_references(paperid))
-        paper['references_count'] = len(paper['references'])
-        # paper['resources'] = list(generate_resources(paperid))
-        cii = paper.pop('ConferenceInstanceId')
-        if type(cii) is int:
-            paper['conferenceinstance'] = c.execute(
-                'select DisplayName from ConferenceInstances '
-                'where ConferenceInstanceId=?', (cii,)
-            ).fetchone()[0]
-        csi = paper.pop('ConferenceSeriesId')
-        if type(csi) is int:
-            paper['conferenceseries'] = c.execute(
-                'select DisplayName from ConferenceSeries '
-                'where ConferenceSeriesId=?', (csi,)
-            ).fetchone()[0]
-        ji = paper.pop('JournalId')
-        if type(ji) is int:
-            paper['journal'] = c.execute(
-                'select DisplayName from Journals where JournalId=?', (ji,)
-            ).fetchone()[0]
-        ctr.next()
-        yield paper  # .encode('utf-8')
-    ctr.finish()
 
 
 def strip_empty_fields(dic: dict):

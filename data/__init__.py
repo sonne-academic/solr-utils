@@ -93,43 +93,6 @@ def upload_batches_unparsed(session, collection: str, generator):
     print(r.text)
 
 
-def cur_batch_jsonl_unparsed(cursor, batchsize=10_000):
-    """
-    creates larger chunks from a genenerator function.
-
-    :param generator: the generator function that yields lines of json
-    :param batchsize: the maximum size of the batch
-    :return: yields utf-8 encoded bytes
-    """
-    while True:
-        try:
-            batch = itertools.islice(generator, batchsize)
-            batch = '\n'.join(batch)
-            if 0 < len(batch):
-                yield batch.encode('utf-8')
-            else:
-                break
-        except KeyboardInterrupt:
-            break
-
-
-def cur_upload_batches_unparsed(session, collection: str, cursor):
-    print('sending documents')
-    counter = 0
-    batch_generator = cur_batch_jsonl_unparsed(generator)
-    for response in upload_parallel(batch_generator, session, collection):  # 3922 batches with 10_000 size
-        counter += 1
-        d = response.json()
-        if d['responseHeader']['status'] != 0:
-            print(f'{d}')
-        # print(f'{counter:4d}', end=' ')
-        # if counter % 10 == 0:
-        #     print()
-    print('sending commit')
-    r = session.collection(collection).update.xml('<commit/>')
-    print(r.text)
-
-
 def read_gzip_lines(path, encoding):
     size = path.stat().st_size
     file = path.open('rb')
@@ -149,9 +112,9 @@ def parse_json(line):
         return "{}", {}
 
 
-def do_parallel(iterable, callable):
+def do_parallel(iterable, func):
     with Pool(processes=cpu_count()*2) as pool:
-        yield from pool.imap(callable, iterable)
+        yield from pool.imap(func, iterable)
 
 
 def parse_jsonl_parallel(generator, processes=4):
