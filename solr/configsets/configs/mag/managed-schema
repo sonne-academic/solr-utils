@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema name="default-config" version="1.6">
-  <fieldType name="pint" class="solr.IntPointField" docValues="true"/>
-  <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
-  <fieldType name="pdate" class="solr.DatePointField" docValues="true" stored="true"/>
-  <fieldType name="string" class="solr.StrField" docValues="true" sortMissingLast="true"/>
-  <fieldType name="strings" class="solr.StrField" docValues="true" multiValued="true" sortMissingLast="true"/>
-  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true"/>
-
-  <fieldType name="important_strings" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
-  <fieldType name="important_string" class="solr.StrField" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
+  <fieldType name="pint" class="solr.IntPointField" uninvertible="false" docValues="true"/>
+  <fieldType name="plong" class="solr.LongPointField" uninvertible="false" docValues="true"/>
+  <fieldType name="pdate" class="solr.DatePointField" uninvertible="false" docValues="true" stored="true"/>
+  <fieldType name="string" class="solr.StrField" uninvertible="false" docValues="true" sortMissingLast="true"/>
+  <fieldType name="strings" class="solr.StrField" uninvertible="false" docValues="true" multiValued="true" sortMissingLast="true"/>
+  <fieldType name="text_general" class="solr.TextField" uninvertible="false" positionIncrementGap="100" multiValued="true"/>
+  <fieldType name="important_strings" class="solr.StrField" uninvertible="false" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="important_string" class="solr.StrField" uninvertible="false" sortMissingLast="true" docValues="true" indexed="true" stored="true" multiValued="false"/>
 
   <uniqueKey>id</uniqueKey>
 
@@ -43,17 +42,17 @@
   <field name="conferenceinstance"   type="important_string"/>
   <field name="conferenceseries" type="important_string"/>
   <field name="author" type="important_strings"/>
-  <field name="affiliations" type="important_strings"/>
+  <field name="affiliation" type="important_strings"/>
   <field name="author_count" type="pint"/>
   <field name="references" type="important_strings"/>
   <field name="cited_by" type="important_strings"/>
   <field name="urls" type="important_strings"/>
   <field name="journal" type="important_string"/>
 
-  <fieldType name="suggest_type" class="solr.TextField" stored="true" multiValued="false" positionIncrementGap="100"/>
+  <fieldType name="suggest_type" class="solr.TextField" uninvertible="false" stored="true" multiValued="false" positionIncrementGap="100"/>
   <field name="suggest" type="suggest_type"/>
 
-  <fieldType name="text_lower" class="solr.TextField" multiValued="false" positionIncrementGap="100">
+  <fieldType name="text_lower" class="solr.TextField" uninvertible="false" multiValued="false" positionIncrementGap="100">
     <analyzer>
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
@@ -62,7 +61,7 @@
   <field name="suggest_lower"   type="text_lower"/>
   <copyField source="suggest"    dest="suggest_lower"/>
 
-  <fieldType name="text_prefix" class="solr.TextField" multiValued="false" positionIncrementGap="100">
+  <fieldType name="text_prefix" class="solr.TextField" uninvertible="false" multiValued="false" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer class="solr.WhitespaceTokenizerFactory"/>
       <filter class="solr.LowerCaseFilterFactory"/>
