@@ -1,4 +1,4 @@
-from data.mag.build_docs_from_sqlite_mp import yield_parallel, count_papers
+from data.mag.build_docs_from_sqlite import generate_papers, count_papers, strip_and_dump_from_gen
 from solr.instances import get_session
 from data import upload_batches_unparsed
 from solr.session import SolrSession
@@ -25,4 +25,5 @@ if __name__ == '__main__':
     reset = False
     if reset is True:
         reset_collection(s)
-    upload_batches_unparsed(s, 'mag', yield_parallel())
+    generator = strip_and_dump_from_gen(generate_papers(max_num=rows))
+    upload_batches_unparsed(s, 'mag', generator)

@@ -24,21 +24,31 @@ paper_field_names = {
     'FirstPage': 'firstpage',
     'LastPage': 'lastpage',
     'OriginalVenue': 'venue',
-    'JournalId': 'JournalId',
-    'ConferenceSeriesId': 'ConferenceSeriesId',
-    'ConferenceInstanceId': 'ConferenceInstanceId',
+    # 'JournalId': 'JournalId',
+    # 'ConferenceSeriesId': 'ConferenceSeriesId',
+    # 'ConferenceInstanceId': 'ConferenceInstanceId',
 }
+
+
+def strip_and_dump_from_gen(generator):
+    for data in generator:
+        strip_empty_fields(data)
+        yield json.dumps(data, ensure_ascii=False)
+
 
 def generate_papers(max_num=100):
     c = row_conn.cursor()
     fields = ', '.join(paper_field_names)
     new_names = list(paper_field_names.values())
     ctr = 0
+    ips = ItemsPerSecondBar('Merging', max=max_num)
     for paper in c.execute(f'select {fields} from Papers'):
         if ctr > max_num:
             break
         ctr += 1
         yield dict(zip(new_names, paper))
+        ips.next()
+    ips.finish()
 
 
 def generate_author_affiliations(paperid):
@@ -94,7 +104,6 @@ def generate_resources(paperid):
 
 def generate_assembled_papers(max_num=100):
     c = conn.cursor()
-    ctr = ItemsPerSecondBar('Merging', max=max_num)
     for paper in generate_papers(max_num):
         paperid = paper['id']
         paper['author'], paper['affiliations'] = generate_author_affiliations(paperid)
@@ -122,9 +131,7 @@ def generate_assembled_papers(max_num=100):
                 'select DisplayName from Journals where JournalId=?', (ji,)
             ).fetchone()[0]
         ctr.next()
-        strip_empty_fields(paper)
-        jsonl = json.dumps(paper, ensure_ascii=False) + '\n'
-        yield jsonl  # .encode('utf-8')
+        yield paper  # .encode('utf-8')
     ctr.finish()
 
 
