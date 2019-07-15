@@ -119,6 +119,24 @@ def generate_references_updates():
     ips.finish()
 
 
+def generate_cby_updates():
+    c = conn.cursor()
+    query = 'select PaperReferenceId, PaperId from PaperReferences order by PaperReferenceId'
+    prev_pid = None
+    refs = []
+    ips = ItemsPerSecondBar('references', max=row_count('PaperReferences'))
+    for paperid, ref in c.execute(query):
+        if prev_pid is None:
+            prev_pid = paperid
+        elif prev_pid != paperid:
+            yield {'id': prev_pid, 'cited_by': {'set': refs}, 'cited_by_count': {'set': len(refs)}}
+            refs = []
+            prev_pid = paperid
+        refs.append(ref)
+        ips.next()
+    ips.finish()
+
+
 def generate_cited_by_updates():
     c = conn.cursor()
     query = 'select PaperReferenceId, PaperId from PaperReferences order by PaperReferenceId'
@@ -129,7 +147,7 @@ def generate_cited_by_updates():
         if prev_pid is None:
             prev_pid = paperid
         elif prev_pid != paperid:
-            yield {'id': paperid, 'cited_by': {'set': cites}, 'cited_by_count': {'set': len(cites)}}
+            yield {'id': prev_pid, 'cited_by': {'set': cites}, 'cited_by_count': {'set': len(cites)}}
             cites = []
             prev_pid = paperid
         cites.append(citation)
@@ -139,7 +157,7 @@ def generate_cited_by_updates():
 
 UPDATE_GENERATORS = [
     generate_author_affiliation_updates,
-    generate_cited_by_updates,
+    generate_cby_updates,
     generate_journal_updates,
     generate_references_updates,
     generate_url_updates,
