@@ -207,16 +207,17 @@ def encode(inp_q, out_q):
 
 def main():
     input_queue, feeder = merge_paper_data()
-    output_queue = mp.Queue(maxsize=10_000)
-    encoder_procs = []
-    for i in range(mp.cpu_count()):
-        p = mp.Process(target=encode, args=(input_queue, output_queue))
-        p.start()
-        encoder_procs.append(p)
+    # output_queue = mp.Queue(maxsize=10_000)
+    # encoder_procs = []
+    # for i in range(mp.cpu_count()):
+    #     p = mp.Process(target=encode, args=(input_queue, output_queue))
+    #     p.start()
+    #     encoder_procs.append(p)
 
     with gzip.open(mag.DATA_FOLDER / 'merged.jsonl.gz', 'wb') as outfile:
-        for paper in iter(output_queue.get, 'STOP'):
-            outfile.write(paper)
+        for paper in iter(input_queue.get, 'STOP'):
+            line = json.dumps(paper, ensure_ascii=False) + '\n'
+            outfile.write(line.encode('utf-8'))
 
 
 if __name__ == '__main__':
