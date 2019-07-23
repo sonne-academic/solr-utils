@@ -148,60 +148,75 @@ def strip_empty_fields(dic: dict):
 
 
 def merge_paper_data():
-    conn = make_connection()
+    def generate():
+        conn = make_connection()
 
-    journals = dict(conn.execute('select JournalId, DisplayName from Journals'))
-    conference_series = dict(conn.execute('select ConferenceSeriesId, DisplayName from ConferenceSeries'))
-    conference_instances = dict(conn.execute('select ConferenceInstanceId, DisplayName from ConferenceInstances'))
-    print('assembler started, looping')
-    feeder_creators = [
-        make_paper_feed_proc,
-        make_author_affiliation_feed_proc,
-        make_citation_feed_proc,
-        make_references_feed_proc,
-        make_url_feed_proc
-    ]
-    procs = []
-    queues = []
-    iters = []
-    for creator in feeder_creators:
-        q, p = creator()
-        procs.append(p)
-        queues.append(q)
-        iters.append(iter(q.get, 'STOP'))
-    count = 0
-    print('iterating')
-    row_count = count_papers()
-    ips = ItemsPerSecondBar('Merging', max=row_count)
-    for pid, group in groupby(merge(*iters, key=lambda x: x[0]), key=lambda x: x[0]):
-        _, paper = next(group)
-        for _, remaining in group:
-            paper.update(remaining)
+        journals = dict(conn.execute('select JournalId, DisplayName from Journals'))
+        conference_series = dict(conn.execute('select ConferenceSeriesId, DisplayName from ConferenceSeries'))
+        conference_instances = dict(conn.execute('select ConferenceInstanceId, DisplayName from ConferenceInstances'))
+        feeder_creators = [
+            make_paper_feed_proc,
+            make_author_affiliation_feed_proc,
+            make_citation_feed_proc,
+            make_references_feed_proc,
+            make_url_feed_proc
+        ]
+        procs = []
+        queues = []
+        iters = []
+        for creator in feeder_creators:
+            q, p = creator()
+            procs.append(p)
+            queues.append(q)
+            iters.append(iter(q.get, 'STOP'))
 
-        cii = paper.pop('conferenceinstanceid')
-        if type(cii) is int:
-            paper['conferenceinstance'] = conference_instances[cii]
-        csi = paper.pop('conferenceseriesid')
-        if type(csi) is int:
-            paper['conferenceseries'] = conference_series[csi]
-        ji = paper.pop('journalid')
-        if type(ji) is int:
-            paper['journal'] = journals[ji]
-        strip_empty_fields(paper)
-        yield paper
-        ips.next()
+        row_count = count_papers()
+        ips = ItemsPerSecondBar('Merging', max=row_count)
+        for pid, group in groupby(merge(*iters, key=lambda x: x[0]), key=lambda x: x[0]):
+            _, paper = next(group)
+            for _, remaining in group:
+                paper.update(remaining)
 
-        # if ips.index > 100:
-        #     for proc in procs:
-        #         proc.kill()
-    ips.finish()
+            cii = paper.pop('conferenceinstanceid')
+            if type(cii) is int:
+                paper['conferenceinstance'] = conference_instances[cii]
+            csi = paper.pop('conferenceseriesid')
+            if type(csi) is int:
+                paper['conferenceseries'] = conference_series[csi]
+            ji = paper.pop('journalid')
+            if type(ji) is int:
+                paper['journal'] = journals[ji]
+            strip_empty_fields(paper)
+            input_queue.put(paper)
+            ips.next()
+        for i in range(mp.cpu_count()):
+            input_queue.put('STOP')
+
+        ips.finish()
+    input_queue = mp.Queue(maxsize=10_000)
+    feeder = mp.Process(target=generate)
+    feeder.start()
+    return input_queue, feeder
+
+
+def encode(inp_q, out_q):
+    for paper in iter(inp_q.get, 'STOP'):
+        line = json.dumps(paper, ensure_ascii=False) + '\n'
+        out_q.put(line.encode('utf-8'))
 
 
 def main():
-    with gzip.open(mag.DATA_FOLDER / 'merged.jsonl.gz', 'wt') as outfile:
-        for paper in merge_paper_data():
-            line = json.dumps(paper, ensure_ascii=False) + '\n'
-            outfile.write(line)
+    input_queue, feeder = merge_paper_data()
+    output_queue = mp.Queue(maxsize=10_000)
+    encoder_procs = []
+    for i in range(mp.cpu_count()):
+        p = mp.Process(target=encode, args=(input_queue, output_queue))
+        p.start()
+        encoder_procs.append(p)
+
+    with gzip.open(mag.DATA_FOLDER / 'merged.jsonl.gz', 'wb') as outfile:
+        for paper in iter(output_queue.get, 'STOP'):
+            outfile.write(paper)
 
 
 if __name__ == '__main__':
