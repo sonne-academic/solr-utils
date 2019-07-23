@@ -6,16 +6,8 @@ from data import DATA_HOME, ItemsPerSecondBar
 import multiprocessing as mp
 
 DATA_FOLDER = DATA_HOME / 'mag'
-# conn = sqlite3.connect(DATA_FOLDER / 'mag.sqlite3', check_same_thread=False)
-# row_conn = sqlite3.connect(DATA_FOLDER / 'mag.sqlite3', check_same_thread=False)
-# row_conn.row_factory = sqlite3.Row
-
-
-def make_connection():
-    return sqlite3.connect(DATA_FOLDER / 'mag.sqlite3', check_same_thread=False)
-
-PROC_COUNT = mp.cpu_count()*2
-
+PROC_COUNT = mp.cpu_count()
+PROC_COUNT = 1
 paper_field_names = {
     'PaperId': 'id',
     'Doi': 'doi',
@@ -36,15 +28,15 @@ paper_field_names = {
 }
 
 
-def generate_papers(max_num=100):
+def make_connection():
+    return sqlite3.connect(DATA_FOLDER / 'mag.sqlite3', check_same_thread=False)
+
+
+def generate_papers():
     c = make_connection()
     fields = ', '.join(paper_field_names)
     new_names = list(paper_field_names.values())
-    ctr = 0
-    for paper in c.execute(f'select {fields} from Papers'):
-        if ctr > max_num:
-            break
-        ctr += 1
+    for paper in c.execute(f'select {fields} from Papers order by PaperId'):
         yield dict(zip(new_names, paper))
 
 
@@ -55,7 +47,7 @@ def generate_author_affiliations(conn, paperid):
     affiliations = []
     for author, affiliation in outer_c.execute(
             'select OriginalAuthor, OriginalAffiliation from PaperAuthorAffiliations where PaperId=? '
-            'order by PaperAuthorAffiliations.AuthorSequenceNumber', (paperid,)):
+            'order by PaperId, AuthorSequenceNumber', (paperid,)):
         authors.append(author)
         affiliations.append(affiliation)
     return authors, affiliations
@@ -73,6 +65,25 @@ def generate_author_affiliations(conn, paperid):
     #         aa.pop('AffiliationId')
     #     aa['Author'] = dict(inner_c.execute('select * from Authors where AuthorId=?', (aa['AuthorId'],)).fetchone())
     #     yield aa
+
+def yield_lines_from_gziped_references():
+    with gzip.open(DATA_FOLDER / 'PaperReferences_sortk2.txt.gz', 'rt') as file:
+        for line in file:
+            yield line.split()
+
+
+def generate_citation_from_gzip():
+    prev_id = None
+    refs = []
+    for cited_id, paperid in yield_lines_from_gziped_references():
+        if prev_id is None:
+            prev_id = paperid
+        elif prev_id != paperid:
+            yield int(prev_id), refs
+            prev_id = paperid
+            refs = []
+        refs.append(int(cited_id))
+
 
 
 def generate_urls(conn, paperid):
@@ -95,34 +106,44 @@ def generate_cited_by(conn, paperid):
 
 def assemble(inp: mp.JoinableQueue, outp: mp.JoinableQueue):
     conn = make_connection()
-    c = conn.cursor()
     print('assembler started, looping')
+    journals = dict(conn.execute('select JournalId, DisplayName from Journals'))
+    conference_series = dict(conn.execute('select ConferenceSeriesId, DisplayName from ConferenceSeries'))
+    conference_instances = dict(conn.execute('select ConferenceInstanceId, DisplayName from ConferenceInstances'))
+    cited_by_gen = generate_citation_from_gzip()
+    paper_citation_id, paper_citations = next(cited_by_gen)
     for paper in iter(inp.get, 'STOP'):
         paperid = paper['id']
+        # print(paperid, paper_citation_id)
         paper['author'], paper['affiliations'] = generate_author_affiliations(conn, paperid)
         paper['urls'] = list(generate_urls(conn, paperid))
-        paper['cited_by'] = list(generate_cited_by(conn, paperid))
-        paper['cited_by_count'] = len(paper['cited_by'])
         paper['references'] = list(generate_references(conn, paperid))
         paper['references_count'] = len(paper['references'])
         # paper['resources'] = list(generate_resources(paperid))
         cii = paper.pop('ConferenceInstanceId')
         if type(cii) is int:
-            paper['conferenceinstance'] = c.execute(
-                'select DisplayName from ConferenceInstances '
-                'where ConferenceInstanceId=?', (cii,)
-            ).fetchone()[0]
+            paper['conferenceinstance'] = conference_instances[cii]
         csi = paper.pop('ConferenceSeriesId')
         if type(csi) is int:
-            paper['conferenceseries'] = c.execute(
-                'select DisplayName from ConferenceSeries '
-                'where ConferenceSeriesId=?', (csi,)
-            ).fetchone()[0]
+            paper['conferenceseries'] = conference_series[csi]
         ji = paper.pop('JournalId')
         if type(ji) is int:
-            paper['journal'] = c.execute(
-                'select DisplayName from Journals where JournalId=?', (ji,)
-            ).fetchone()[0]
+            paper['journal'] = journals[ji]
+        if paper_citation_id == paperid:
+            print('found citation information')
+            paper['cited_by'] = list(paper_citations)
+            paper['cited_by_count'] = len(paper_citations)
+            try:
+                paper_citation_id, paper_citations = next(cited_by_gen)
+            except StopIteration:
+                print('citations were finished')
+                paper_citation_id = 0
+                paper_citations = []
+        # elif paper_citation_id < paperid:
+        #     print(f'onoz, we skipped something? pid {paperid} > {paper_citation_id}')
+        #     break
+        # else:
+        #     print(f'seems to be in order: cited_id {paper_citation_id}, paper_id {paperid}')
         strip_empty_fields(paper)
         jsonl = json.dumps(paper, ensure_ascii=False) + '\n'
         outp.put(jsonl)
@@ -150,8 +171,8 @@ def count_papers():
     return c.execute('SELECT Count(*) FROM Papers').fetchone()[0]
 
 
-def feed(inp: mp.JoinableQueue, count):
-    for paper in generate_papers(max_num=count):
+def feed(inp: mp.JoinableQueue):
+    for paper in generate_papers():
         inp.put(paper)
     # print(f'feeding finished after {idx}')
     for i in range(PROC_COUNT):
@@ -167,20 +188,27 @@ def yield_parallel():
     assemblers = []
     row_count = count_papers()
     for i in range(PROC_COUNT):
-        proc = mp.Process(target=assemble, args=(input_queue,output_queue))
+        proc = mp.Process(target=assemble, args=(input_queue, output_queue))
         proc.start()
         assemblers.append(proc)
 
-    feeder = mp.Process(target=feed, args=(input_queue, row_count))
+    feeder = mp.Process(target=feed, args=(input_queue,))
     feeder.start()
-    ctr = ItemsPerSecondBar('Merging', max=row_count)
+    ips = ItemsPerSecondBar('Merging', max=row_count)
     for jsonl in iter(output_queue.get, 'STOP'):
         yield jsonl
-        ctr.next()
-    ctr.finish()
+        ips.next()
+    ips.finish()
 
 
 def main():
+    ctr=0
+    # for paperid, cited_by in generate_citation_from_gzip():
+    #     print(paperid, cited_by)
+    #     ctr += 1
+    #     if ctr >= 10:
+    #         exit(0)
+    #
     start = datetime.now()
     row_count = count_papers()
     print(f'merging {row_count} rows')
