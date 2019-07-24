@@ -5,6 +5,7 @@ from data.mag.data_classes.paper_author_affiliations import PaperAuthorAffiliati
 from data.mag.headers import Authors, Papers, Journals, ConferenceInstances, ConferenceSeries, PaperAuthorAffiliations
 
 _ENCODING = 'utf-8'
+ENCODING = 'utf-8'
 DATA_FOLDER = DATA_HOME / 'mag'
 conn = sqlite3.connect(DATA_FOLDER/'mag.sqlite3', check_same_thread=False)
 
@@ -23,6 +24,10 @@ CONF_INST_UPDATE_FILE = DATA_FOLDER / f'conference_instance_updates.jsonl.gz'
 CONF_SER_UPDATE_FILE = DATA_FOLDER / f'conference_series_updates.jsonl.gz'
 
 DENORM_PAPER_FILE = DATA_FOLDER / f'papers_denormailzed.jsonl.gz'
+
+
+def read_gzip_lines_utf8(path):
+    yield from read_gzip_lines(path, encoding=_ENCODING)
 
 
 def discard_empty(thing: dict):
