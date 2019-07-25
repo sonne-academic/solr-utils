@@ -1,5 +1,5 @@
 from solr.instances import get_session
-from data import batch_jsonl_parsed
+from data import batch_jsonl_parsed, upload_parallel
 from solr.session import SolrSession
 from solr.configsets import get_config
 from data.s2 import read_all
@@ -48,7 +48,6 @@ def parse_json(line: str) -> str:
     return json.dumps(parsed)
 
 
-
 def reset_collection(s: SolrSession):
     print('deleting collection')
     print(s.admin.collections.delete('s2.2019-01-31').json())
@@ -69,4 +68,8 @@ if __name__ == '__main__':
     reset = True
     if reset is True:
         reset_collection(s)
-    batch_jsonl_parsed(read_all(), 10_000, parse_json)
+    batch_generator = batch_jsonl_parsed(read_all(), 10_000, parse_json)
+    for response in upload_parallel(batch_generator, s, 's2.2019-01-31'):
+        d = response.json()
+        if d['responseHeader']['status'] != 0:
+            print(f'{d}')
