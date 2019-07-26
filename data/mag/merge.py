@@ -120,7 +120,8 @@ def make_author_affiliation_feed_proc():
             _, author, affiliation = list(map(list, zip(*group)))
             input_queue.put((int(pid), {
                 'author': author,
-                'affiliation': affiliation
+                'author_count': len(author),
+                'affiliation': affiliation,
             }))
         input_queue.put('STOP')
         # input_queue.join()
