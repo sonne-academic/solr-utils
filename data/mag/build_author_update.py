@@ -5,7 +5,10 @@ from data.mag import generate_paper_author_affiliations, DATA_FOLDER
 import gzip
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
-
+from urllib.parse import quote_from_bytes
+from os import fspath, scandir
+from sys import intern
+from os import DirEntry
 s = get_localhost_session()
 
 def get_parallel(generator):

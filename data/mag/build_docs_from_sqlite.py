@@ -24,9 +24,9 @@ paper_field_names = {
     'FirstPage': 'firstpage',
     'LastPage': 'lastpage',
     'OriginalVenue': 'venue',
-    # 'JournalId': 'JournalId',
-    # 'ConferenceSeriesId': 'ConferenceSeriesId',
-    # 'ConferenceInstanceId': 'ConferenceInstanceId',
+    'JournalId': 'JournalId',
+    'ConferenceSeriesId': 'ConferenceSeriesId',
+    'ConferenceInstanceId': 'ConferenceInstanceId',
 }
 
 
@@ -46,7 +46,7 @@ def generate_papers():
     fields = ', '.join(paper_field_names)
     new_names = list(paper_field_names.values())
     ips = ItemsPerSecondBar('papers', max=row_count('Papers'))
-    for paper in c.execute(f'select {fields} from Papers'):
+    for paper in c.execute(f'select {fields} from Papers order by PaperId'):
         yield dict(zip(new_names, paper))
         ips.next()
     ips.finish()
@@ -145,10 +145,10 @@ def generate_cited_by_updates():
 
 
 UPDATE_GENERATORS = [
-    generate_author_affiliation_updates,
-    generate_cited_by_updates,
-    generate_journal_updates,
-    generate_references_updates,
+    generate_author_affiliation_updates,  # 14.0k/s
+    generate_cited_by_updates,            #  1.4k/s
+    generate_journal_updates,             #  5,0 k/s
+    generate_references_updates,          # 13.0k/s
     generate_url_updates,
 ]
 
@@ -179,11 +179,18 @@ def main():
     row_count = count_papers()
     print(f'merging {row_count} rows')
     print(f'started on {start}')
+    for upd_gen in UPDATE_GENERATORS:
+        with gzip.open('/dev/null', 'wb') as out_file:
+            for i, val in enumerate(upd_gen()):
+                if i >= 100_00:
+                    print()
+                    break
+                out_file.write((json.dumps(val, ensure_ascii=False) + '\n').encode('utf-8'))
 
-    with gzip.open('docs.jsonl.gz', 'wb') as out_file:
-        for paper in generate_assembled_papers(row_count):
-            jsonl = json.dumps(paper, ensure_ascii=False) + '\n'
-            out_file.write(jsonl.encode('utf-8'))
+    # with gzip.open('docs.jsonl.gz', 'wb') as out_file:
+    #     for paper in generate_assembled_papers(row_count):
+    #         jsonl = json.dumps(paper, ensure_ascii=False) + '\n'
+    #         out_file.write(jsonl.encode('utf-8'))
 
     end = datetime.now()
     delta = end - start

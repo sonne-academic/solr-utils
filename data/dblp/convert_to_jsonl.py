@@ -141,14 +141,14 @@ def build_upload_document(it=get_evt()):
 
 
 def write_to_gzip():
-    with gzip.open(DBLP_DATA / 'dblp-2019-07-01.jsonl.gz', 'wb') as out_file:
+    with gzip.open(DBLP_DATA / 'dblp-2020-02-01.jsonl.gz', 'wb') as out_file:
         for content in build_upload_document():
             b = json.dumps(content, ensure_ascii=False).encode('utf-8')
             out_file.write(b + b'\n')
 
 
 def yield_from_gzip():
-    path = DBLP_DATA / 'dblp-2019-07-01.jsonl.gz'
+    path = DBLP_DATA / 'dblp-2020-02-01.jsonl.gz'
     size = path.stat().st_size
     file = path.open('rb')
     ps=ProgressStream(file, size)

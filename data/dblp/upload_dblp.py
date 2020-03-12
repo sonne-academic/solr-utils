@@ -125,9 +125,9 @@ def main():
     alias = 'dblp'
     config_local = 'dblp'
     config_online = 'dblp'
-    version = '2019-07-01'
+    version = '2020-02-01'
     collection_name = '.'.join([alias, version])
-    s = get_session('localhost', port=8984)
+    s = get_session('localhost', port=8983)
     collections = s.admin.collections.list().json()['collections']
     create = False
     if collection_name in collections:

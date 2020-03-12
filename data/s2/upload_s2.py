@@ -78,7 +78,7 @@ def parse_json(line: str) -> str:
 
     parsed['references_count'] = len(parsed.get('references', []))
     parsed['cited_by_count'] = len(parsed.get('cited_by', []))
-    parsed['author_count'] = len(parsed.get('author',[]))
+    parsed['author_count'] = len(parsed.get('author', []))
     return json.dumps(parsed)
 
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
     print('sending documents')
     counter = 0
-    batch_generator = batch_jsonl_parsed(read_all(),batch_size, parse_json)
+    batch_generator = batch_jsonl_parsed(read_all(), batch_size, parse_json)
     for response in upload_parallel(batch_generator, s, 's2'):  # 3922 batches with 10_000 size
         counter += 1
         d = response.json()

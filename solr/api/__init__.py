@@ -13,4 +13,7 @@ class SolrPathApi:
         response = self.session._get_path(self.path, **kwargs)
         return response
 
+    def command(self, path, command, params):
+        return self.session._post_path(f'{path}', json={command: params})
+
 

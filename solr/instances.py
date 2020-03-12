@@ -1,4 +1,4 @@
-from sshtunnel import SSHTunnelForwarder
+# from sshtunnel import SSHTunnelForwarder
 from solr.session import SolrConnector, SolrSession, SolrAsyncSession
 
 
@@ -43,6 +43,23 @@ class SolrJumpHostConnector(SolrConnector):
         self.tunnel.stop()
 
 
+class SolrKubernetesConnector(SolrConnector):
+    def __init__(self,
+                 host='127.0.0.1',
+                 kubernetes_port=8001,
+                 namespace='default',
+                 service_name='solr-service',
+                 service_port=8983):
+        self.url = f'http://{host}:{kubernetes_port}/api/v1/namespaces/{namespace}'
+        self.url += f'/services/http:{service_name}:{service_port}/proxy/solr/'
+
+    def connect(self) -> str:
+        return self.url
+
+    def close(self):
+        pass
+
+
 def get_production_session():
     return SolrSession(SolrJumpHostConnector('cloud', 'solr0', 'arch'))
 
@@ -53,6 +70,10 @@ def get_develop_session():
 
 def get_localhost_session(port=8983):
     return SolrSession(LocalhostConnector(port))
+
+
+def get_kubernetes_proxy_session():
+    return SolrSession(SolrKubernetesConnector())
 
 
 def get_session(host='solr0', port=8983):

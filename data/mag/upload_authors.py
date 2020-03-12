@@ -22,7 +22,7 @@ def reset_collection(s: SolrSession):
 if __name__ == '__main__':
     s = get_session('localhost', 8984)
 
-    reset = True
+    reset = False
     if reset is True:
         reset_collection(s)
     upload_batches_unparsed(s, 'mag_authors', generate_authors())
